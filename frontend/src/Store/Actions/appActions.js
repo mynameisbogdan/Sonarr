@@ -209,7 +209,7 @@ export const reducers = createHandleActions({
       if (!state.prevVersion) {
         newState.prevVersion = state.version;
       }
-      newState.isUpdated = true;
+      newState.isUpdated = window.Sonarr.isProduction;
     }
 
     return Object.assign({}, state, newState);
