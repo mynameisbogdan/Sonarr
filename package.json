@@ -10,7 +10,8 @@
     "watch": "webpack --watch --config ./frontend/build/webpack.config.js",
     "lint": "eslint --config frontend/.eslintrc.js --ignore-path frontend/.eslintignore frontend/",
     "lint-fix": "yarn lint --fix",
-    "stylelint": "stylelint frontend/**/*.css --config frontend/.stylelintrc"
+    "stylelint": "stylelint frontend/**/*.css --config frontend/.stylelintrc",
+    "sort-core-en-translations": "eslint --ext .json --plugin i18n-json --rule 'i18n-json/sorted-keys: [2, { order: \"asc\", indentSpaces: 2 }]' src/NzbDrone.Core/Localization/Core/en.json --fix"
   },
   "repository": "https://github.com/Sonarr/Sonarr",
   "author": "Team Sonarr",
@@ -115,6 +116,7 @@
     "eslint": "8.40.0",
     "eslint-config-prettier": "8.8.0",
     "eslint-plugin-filenames": "1.3.2",
+    "eslint-plugin-i18n-json": "4.0.0",
     "eslint-plugin-import": "2.27.5",
     "eslint-plugin-prettier": "4.2.1",
     "eslint-plugin-react": "7.32.2",
