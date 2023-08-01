@@ -112,6 +112,19 @@ function IndexerOptions({
             />
           </FormGroup>
 
+          <FormGroup>
+            <FormLabel>{translate('PreferIndexerFlags')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="preferIndexerFlags"
+              helpText={translate('PreferIndexerFlagsHelpText')}
+              helpLink="https://wiki.servarr.com/sonarr/settings#indexer-flags"
+              onChange={handleInputChange}
+              {...settings.preferIndexerFlags}
+            />
+          </FormGroup>
+
           <FormGroup advancedSettings={showAdvancedSettings} isAdvanced={true}>
             <FormLabel>{translate('RssSyncInterval')}</FormLabel>
 
