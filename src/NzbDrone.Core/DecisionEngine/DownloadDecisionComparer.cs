@@ -37,6 +37,7 @@ namespace NzbDrone.Core.DecisionEngine
                 CompareEpisodeCount,
                 CompareEpisodeNumber,
                 CompareIndexerPriority,
+                CompareIndexerFlags,
                 ComparePeersIfTorrent,
                 CompareAgeIfUsenet,
                 CompareSize
@@ -85,6 +86,16 @@ namespace NzbDrone.Core.DecisionEngine
         private int CompareCustomFormatScore(DownloadDecision x, DownloadDecision y)
         {
             return CompareBy(x.RemoteEpisode, y.RemoteEpisode, remoteMovie => remoteMovie.CustomFormatScore);
+        }
+
+        private int CompareIndexerFlags(DownloadDecision x, DownloadDecision y)
+        {
+            if (!_configService.PreferIndexerFlags)
+            {
+                return 0;
+            }
+
+            return CompareBy(x.RemoteEpisode.Release, y.RemoteEpisode.Release, release => ScoreFlags(release.IndexerFlags));
         }
 
         private int CompareProtocol(DownloadDecision x, DownloadDecision y)
@@ -202,6 +213,33 @@ namespace NzbDrone.Core.DecisionEngine
             });
 
             return sizeCompare;
+        }
+
+        private int ScoreFlags(IndexerFlags flags)
+        {
+            var flagValues = Enum.GetValues(typeof(IndexerFlags));
+
+            var score = 0;
+
+            foreach (IndexerFlags value in flagValues)
+            {
+                if ((flags & value) == value)
+                {
+                    switch (value)
+                    {
+                        case IndexerFlags.DoubleUpload:
+                        case IndexerFlags.Freeleech:
+                        case IndexerFlags.Internal:
+                            score += 2;
+                            break;
+                        case IndexerFlags.Halfleech:
+                            score += 1;
+                            break;
+                    }
+                }
+            }
+
+            return score;
         }
     }
 }

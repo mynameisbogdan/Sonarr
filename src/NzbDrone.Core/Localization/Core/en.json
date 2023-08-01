@@ -1586,6 +1586,8 @@
   "PosterSize": "Poster Size",
   "Posters": "Posters",
   "PreferAndUpgrade": "Prefer and Upgrade",
+  "PreferIndexerFlags": "Prefer Indexer Flags",
+  "PreferIndexerFlagsHelpText": "Prioritize releases with special flags",
   "PreferProtocol": "Prefer {preferredProtocol}",
   "PreferTorrent": "Prefer Torrent",
   "PreferUsenet": "Prefer Usenet",
