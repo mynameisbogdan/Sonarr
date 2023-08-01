@@ -124,6 +124,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("MinimumAge", value); }
         }
 
+        public bool PreferIndexerFlags
+        {
+            get { return GetValueBoolean("PreferIndexerFlags", false); }
+
+            set { SetValue("PreferIndexerFlags", value); }
+        }
+
         public ProperDownloadTypes DownloadPropersAndRepacks
         {
             get { return GetValueEnum("DownloadPropersAndRepacks", ProperDownloadTypes.PreferAndUpgrade); }
