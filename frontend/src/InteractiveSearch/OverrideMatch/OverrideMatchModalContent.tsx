@@ -236,6 +236,16 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
     []
   );
 
+  let seriesTitle = series?.title;
+
+  if (
+    seriesTitle &&
+    series?.year &&
+    !seriesTitle.includes(String(series.year))
+  ) {
+    seriesTitle += ` (${series.year})`;
+  }
+
   return (
     <ModalContent onModalClose={onModalClose}>
       <ModalHeader>
@@ -249,7 +259,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
             title={translate('Series')}
             data={
               <OverrideMatchData
-                value={series?.title}
+                value={seriesTitle}
                 onPress={onSelectSeriesPress}
               />
             }
