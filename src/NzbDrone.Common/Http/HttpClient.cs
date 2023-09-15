@@ -150,7 +150,7 @@ namespace NzbDrone.Common.Http
                 await _rateLimitService.WaitAndPulseAsync(request.Url.Host, request.RateLimitKey, request.RateLimit);
             }
 
-            _logger.Trace(request);
+            _logger.Debug(request);
 
             var stopWatch = Stopwatch.StartNew();
 
