@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using Newtonsoft.Json;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
@@ -37,6 +38,7 @@ namespace NzbDrone.Core.Notifications.Webhook
 
                 request.Headers.ContentType = "application/json";
                 request.SetContent(body.ToJson());
+                request.ContentSummary = body.ToJson(Formatting.None);
 
                 if (settings.Username.IsNotNullOrWhiteSpace() || settings.Password.IsNotNullOrWhiteSpace())
                 {
