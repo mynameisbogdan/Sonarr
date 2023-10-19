@@ -337,7 +337,7 @@ namespace NzbDrone.Core.Download.Pending
 
         private Queue.Queue GetQueueItem(PendingRelease pendingRelease, Lazy<DateTime> nextRssSync, Episode episode)
         {
-            var ect = pendingRelease.Release.PublishDate.AddMinutes(GetDelay(pendingRelease.RemoteEpisode));
+            var ect = pendingRelease.Added.AddMinutes(GetDelay(pendingRelease.RemoteEpisode));
 
             if (ect < nextRssSync.Value)
             {
