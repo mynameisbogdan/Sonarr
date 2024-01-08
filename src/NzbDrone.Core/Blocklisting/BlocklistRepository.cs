@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.Tv;
@@ -32,7 +33,7 @@ namespace NzbDrone.Core.Blocklisting
 
         public List<Blocklist> BlocklistedBySeries(int seriesId)
         {
-            return Query(b => b.SeriesId == seriesId);
+            return Query(b => b.SeriesId == seriesId).OrderByDescending(b => b.Date).ToList();
         }
 
         public void DeleteForSeriesIds(List<int> seriesIds)

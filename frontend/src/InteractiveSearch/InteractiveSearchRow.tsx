@@ -1,6 +1,8 @@
-import React, { useCallback, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { createSelector } from 'reselect';
 import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
+import AppState from 'App/State/AppState';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
@@ -13,10 +15,14 @@ import EpisodeFormats from 'Episode/EpisodeFormats';
 import EpisodeLanguages from 'Episode/EpisodeLanguages';
 import EpisodeQuality from 'Episode/EpisodeQuality';
 import IndexerFlags from 'Episode/IndexerFlags';
+import usePrevious from 'Helpers/Hooks/usePrevious';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
+import InteractiveSearchPayload from 'InteractiveSearch/InteractiveSearchPayload';
+import { fetchSeriesHistory } from 'Store/Actions/seriesHistoryActions';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import Release from 'typings/Release';
 import formatDateTime from 'Utilities/Date/formatDateTime';
+import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import formatAge from 'Utilities/Number/formatAge';
 import formatBytes from 'Utilities/Number/formatBytes';
 import formatCustomFormatScore from 'Utilities/Number/formatCustomFormatScore';
@@ -70,13 +76,58 @@ function getDownloadTooltip(
   return translate('AddToDownloadQueue');
 }
 
+function releaseHistorySelector(release: Release) {
+  return createSelector(
+    (state: AppState) => state.seriesHistory.items,
+    (state: AppState) => state.seriesBlocklist.items,
+    (seriesHistory, seriesBlocklist) => {
+      const { guid, isBlocklisted = false } = release;
+
+      let historyFailedData = null;
+      let blocklistedData = null;
+
+      const historyGrabbedData = seriesHistory.find(
+        ({ eventType, data }) =>
+          eventType === 'grabbed' && 'guid' in data && data.guid === guid
+      );
+
+      if (historyGrabbedData) {
+        historyFailedData = seriesHistory.find(
+          ({ eventType, sourceTitle }) =>
+            eventType === 'downloadFailed' &&
+            sourceTitle === historyGrabbedData.sourceTitle
+        );
+      }
+
+      if (isBlocklisted) {
+        blocklistedData = seriesBlocklist.find(
+          ({ protocol, indexer, sourceTitle, torrentInfoHash }) =>
+            protocol === release.protocol &&
+            ((release.protocol === 'torrent' &&
+              release.infoHash &&
+              release.infoHash === torrentInfoHash) ||
+              (indexer === release.indexer && sourceTitle === release.title))
+        );
+      }
+
+      return {
+        historyGrabbedData,
+        historyFailedData,
+        blocklistedData,
+      };
+    }
+  );
+}
+
 interface InteractiveSearchRowProps extends Release {
-  searchPayload: object;
+  seriesId: number;
+  searchPayload: InteractiveSearchPayload;
   onGrabPress(...args: unknown[]): void;
 }
 
 function InteractiveSearchRow(props: InteractiveSearchRowProps) {
   const {
+    seriesId,
     guid,
     indexerId,
     protocol,
@@ -111,16 +162,22 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     isGrabbing = false,
     isGrabbed = false,
     grabError,
+    isBlocklisted = false,
     searchPayload,
     onGrabPress,
   } = props;
 
-  const { longDateFormat, timeFormat } = useSelector(
-    createUISettingsSelector()
-  );
+  const { historyGrabbedData, historyFailedData, blocklistedData } =
+    useSelector(releaseHistorySelector(props));
+  const { showRelativeDates, shortDateFormat, longDateFormat, timeFormat } =
+    useSelector(createUISettingsSelector());
 
   const [isConfirmGrabModalOpen, setIsConfirmGrabModalOpen] = useState(false);
   const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
+
+  const previousIsGrabbing = usePrevious(isGrabbing);
+
+  const dispatch = useDispatch();
 
   const onGrabPressWrapper = useCallback(() => {
     if (downloadAllowed) {
@@ -163,6 +220,12 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     setIsOverrideModalOpen(false);
   }, [setIsOverrideModalOpen]);
 
+  useEffect(() => {
+    if (previousIsGrabbing && !isGrabbing) {
+      dispatch(fetchSeriesHistory({ seriesId }));
+    }
+  }, [seriesId, previousIsGrabbing, isGrabbing, dispatch]);
+
   return (
     <TableRow>
       <TableRowCell className={styles.protocol}>
@@ -197,6 +260,76 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
       </TableRowCell>
 
       <TableRowCell className={styles.indexer}>{indexer}</TableRowCell>
+
+      <TableRowCell className={styles.history}>
+        {historyGrabbedData?.date && !historyFailedData?.date ? (
+          <Tooltip
+            anchor={<Icon name={icons.DOWNLOADING} kind={kinds.DEFAULT} />}
+            tooltip={translate('GrabbedAt', {
+              date: getRelativeDate({
+                date: historyGrabbedData.date,
+                shortDateFormat,
+                showRelativeDates,
+                timeFormat,
+                timeForToday: true,
+                includeSeconds: true,
+              }),
+            })}
+            kind={kinds.INVERSE}
+            position={tooltipPositions.LEFT}
+          />
+        ) : null}
+
+        {historyFailedData?.date ? (
+          <Tooltip
+            anchor={<Icon name={icons.DOWNLOADING} kind={kinds.DANGER} />}
+            tooltip={translate('FailedAt', {
+              date: getRelativeDate({
+                date: historyFailedData.date,
+                shortDateFormat,
+                showRelativeDates,
+                timeFormat,
+                timeForToday: true,
+                includeSeconds: true,
+              }),
+            })}
+            kind={kinds.INVERSE}
+            position={tooltipPositions.LEFT}
+          />
+        ) : null}
+
+        {isBlocklisted ? (
+          <Tooltip
+            anchor={
+              <Icon
+                className={
+                  historyGrabbedData || historyFailedData
+                    ? styles.blocklist
+                    : undefined
+                }
+                name={icons.BLOCKLIST}
+                kind={kinds.DANGER}
+              />
+            }
+            tooltip={
+              blocklistedData?.date
+                ? translate('BlocklistedAt', {
+                    date: getRelativeDate({
+                      date: blocklistedData.date,
+                      shortDateFormat,
+                      showRelativeDates,
+                      timeFormat,
+                      timeForToday: true,
+                      includeSeconds: true,
+                    }),
+                  })
+                : translate('Blocklisted')
+            }
+            kind={kinds.INVERSE}
+            position={tooltipPositions.LEFT}
+          />
+        ) : null}
+      </TableRowCell>
 
       <TableRowCell className={styles.size}>{formatBytes(size)}</TableRowCell>
 

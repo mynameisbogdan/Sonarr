@@ -17,6 +17,7 @@ namespace NzbDrone.Core.Blocklisting
         bool Blocklisted(int seriesId, ReleaseInfo release);
         bool BlocklistedTorrentHash(int seriesId, string hash);
         PagingSpec<Blocklist> Paged(PagingSpec<Blocklist> pagingSpec);
+        List<Blocklist> GetBySeriesId(int seriesId);
         void Block(RemoteEpisode remoteEpisode, string message);
         void Delete(int id);
         void Delete(List<int> ids);
@@ -71,22 +72,27 @@ namespace NzbDrone.Core.Blocklisting
             return _blocklistRepository.GetPaged(pagingSpec);
         }
 
+        public List<Blocklist> GetBySeriesId(int seriesId)
+        {
+            return _blocklistRepository.BlocklistedBySeries(seriesId);
+        }
+
         public void Block(RemoteEpisode remoteEpisode, string message)
         {
             var blocklist = new Blocklist
-                            {
-                                SeriesId = remoteEpisode.Series.Id,
-                                EpisodeIds = remoteEpisode.Episodes.Select(e => e.Id).ToList(),
-                                SourceTitle =  remoteEpisode.Release.Title,
-                                Quality = remoteEpisode.ParsedEpisodeInfo.Quality,
-                                Date = DateTime.UtcNow,
-                                PublishedDate = remoteEpisode.Release.PublishDate,
-                                Size = remoteEpisode.Release.Size,
-                                Indexer = remoteEpisode.Release.Indexer,
-                                Protocol = remoteEpisode.Release.DownloadProtocol,
-                                Message = message,
-                                Languages = remoteEpisode.ParsedEpisodeInfo.Languages
-                            };
+            {
+                SeriesId = remoteEpisode.Series.Id,
+                EpisodeIds = remoteEpisode.Episodes.Select(e => e.Id).ToList(),
+                SourceTitle = remoteEpisode.Release.Title,
+                Quality = remoteEpisode.ParsedEpisodeInfo.Quality,
+                Date = DateTime.UtcNow,
+                PublishedDate = remoteEpisode.Release.PublishDate,
+                Size = remoteEpisode.Release.Size,
+                Indexer = remoteEpisode.Release.Indexer,
+                Protocol = remoteEpisode.Release.DownloadProtocol,
+                Message = message,
+                Languages = remoteEpisode.ParsedEpisodeInfo.Languages
+            };
 
             if (remoteEpisode.Release is TorrentInfo torrentRelease)
             {
