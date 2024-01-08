@@ -7,6 +7,7 @@ using NLog;
 using NzbDrone.Common.Cache;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Exceptions;
@@ -33,6 +34,7 @@ namespace Sonarr.Api.V3.Indexers
         private readonly ISeriesService _seriesService;
         private readonly IEpisodeService _episodeService;
         private readonly IParsingService _parsingService;
+        private readonly IBlocklistService _blocklistService;
         private readonly Logger _logger;
 
         private readonly ICached<RemoteEpisode> _remoteEpisodeCache;
@@ -47,6 +49,7 @@ namespace Sonarr.Api.V3.Indexers
                              IParsingService parsingService,
                              ICacheManager cacheManager,
                              IQualityProfileService qualityProfileService,
+                             IBlocklistService blocklistService,
                              Logger logger)
             : base(qualityProfileService)
         {
@@ -58,6 +61,7 @@ namespace Sonarr.Api.V3.Indexers
             _seriesService = seriesService;
             _episodeService = episodeService;
             _parsingService = parsingService;
+            _blocklistService = blocklistService;
             _logger = logger;
 
             PostValidator.RuleFor(s => s.IndexerId).ValidId();
@@ -237,6 +241,12 @@ namespace Sonarr.Api.V3.Indexers
         protected override ReleaseResource MapDecision(DownloadDecision decision, int initialWeight)
         {
             var resource = base.MapDecision(decision, initialWeight);
+
+            if (resource.MappedSeriesId.HasValue)
+            {
+                resource.IsBlocklisted = _blocklistService.Blocklisted(resource.MappedSeriesId.Value, resource.ToModel());
+            }
+
             _remoteEpisodeCache.Set(GetCacheKey(resource), decision.RemoteEpisode, TimeSpan.FromMinutes(30));
 
             return resource;

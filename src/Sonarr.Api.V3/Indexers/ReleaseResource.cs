@@ -92,6 +92,9 @@ namespace Sonarr.Api.V3.Indexers
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool? ShouldOverride { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public bool? IsBlocklisted { get; set; }
     }
 
     public static class ReleaseResourceMapper

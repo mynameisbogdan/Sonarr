@@ -12,6 +12,7 @@ import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import { align, icons, kinds, sortDirections } from 'Helpers/Props';
 import { SortDirection } from 'Helpers/Props/sortDirections';
+import InteractiveSearchPayload from 'InteractiveSearch/InteractiveSearchPayload';
 import InteractiveSearchType from 'InteractiveSearch/InteractiveSearchType';
 import {
   fetchReleases,
@@ -20,6 +21,8 @@ import {
   setReleasesSort,
   setSeasonReleasesFilter,
 } from 'Store/Actions/releaseActions';
+import { fetchSeriesBlocklist } from 'Store/Actions/seriesBlocklistActions';
+import { fetchSeriesHistory } from 'Store/Actions/seriesHistoryActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
 import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
@@ -50,6 +53,12 @@ const columns: Column[] = [
     name: 'indexer',
     label: () => translate('Indexer'),
     isSortable: true,
+    isVisible: true,
+  },
+  {
+    name: 'history',
+    label: () => translate('History'),
+    isSortable: false,
     isVisible: true,
   },
   {
@@ -114,11 +123,16 @@ const columns: Column[] = [
 ];
 
 interface InteractiveSearchProps {
+  seriesId: number;
   type: InteractiveSearchType;
-  searchPayload: object;
+  searchPayload: InteractiveSearchPayload;
 }
 
-function InteractiveSearch({ type, searchPayload }: InteractiveSearchProps) {
+function InteractiveSearch({
+  seriesId,
+  type,
+  searchPayload,
+}: InteractiveSearchProps) {
   const {
     isFetching,
     isPopulated,
@@ -166,6 +180,9 @@ function InteractiveSearch({ type, searchPayload }: InteractiveSearchProps) {
 
       if (!isFetching && !isPopulated) {
         dispatch(fetchReleases(searchPayload));
+
+        dispatch(fetchSeriesBlocklist({ seriesId }));
+        dispatch(fetchSeriesHistory({ seriesId }));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -229,6 +246,7 @@ function InteractiveSearch({ type, searchPayload }: InteractiveSearchProps) {
                 <InteractiveSearchRow
                   key={`${item.indexerId}-${item.guid}`}
                   {...item}
+                  seriesId={seriesId}
                   searchPayload={searchPayload}
                   onGrabPress={handleGrabPress}
                 />
