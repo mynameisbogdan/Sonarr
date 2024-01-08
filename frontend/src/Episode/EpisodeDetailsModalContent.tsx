@@ -18,6 +18,8 @@ import {
   cancelFetchReleases,
   clearReleases,
 } from 'Store/Actions/releaseActions';
+import { clearSeriesBlocklist } from 'Store/Actions/seriesBlocklistActions';
+import { clearSeriesHistory } from 'Store/Actions/seriesHistoryActions';
 import translate from 'Utilities/String/translate';
 import EpisodeHistoryConnector from './History/EpisodeHistoryConnector';
 import EpisodeSearchConnector from './Search/EpisodeSearchConnector';
@@ -102,6 +104,9 @@ function EpisodeDetailsModalContent(props: EpisodeDetailsModalContentProps) {
       // results even after switching tabs.
       dispatch(cancelFetchReleases());
       dispatch(clearReleases());
+
+      dispatch(clearSeriesBlocklist());
+      dispatch(clearSeriesHistory());
     };
   }, [dispatch]);
 
@@ -175,6 +180,7 @@ function EpisodeDetailsModalContent(props: EpisodeDetailsModalContentProps) {
           <TabPanel>
             {/* Don't wrap in tabContent so we not have a top margin */}
             <EpisodeSearchConnector
+              seriesId={seriesId}
               episodeId={episodeId}
               startInteractiveSearch={startInteractiveSearch}
               onModalClose={onModalClose}

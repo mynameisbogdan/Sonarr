@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using NzbDrone.Core.Blocklisting;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Indexers;
+using NzbDrone.Core.Tv;
 using Sonarr.Http;
 using Sonarr.Http.Extensions;
 using Sonarr.Http.REST.Attributes;
@@ -15,12 +17,15 @@ namespace Sonarr.Api.V3.Blocklist
     {
         private readonly IBlocklistService _blocklistService;
         private readonly ICustomFormatCalculationService _formatCalculator;
+        private readonly ISeriesService _seriesService;
 
         public BlocklistController(IBlocklistService blocklistService,
-                                   ICustomFormatCalculationService formatCalculator)
+                                   ICustomFormatCalculationService formatCalculator,
+                                   ISeriesService seriesService)
         {
             _blocklistService = blocklistService;
             _formatCalculator = formatCalculator;
+            _seriesService = seriesService;
         }
 
         [HttpGet]
@@ -41,6 +46,20 @@ namespace Sonarr.Api.V3.Blocklist
             }
 
             return pagingSpec.ApplyToPage(b => _blocklistService.Paged(pagingSpec), b => BlocklistResourceMapper.MapToResource(b, _formatCalculator));
+        }
+
+        [HttpGet("series")]
+        [Produces("application/json")]
+        public List<BlocklistResource> GetSeriesBlocklist(int seriesId)
+        {
+            var series = _seriesService.GetSeries(seriesId);
+
+            return _blocklistService.GetBySeriesId(seriesId).Select(bl =>
+            {
+                bl.Series = series;
+
+                return bl.MapToResource(_formatCalculator);
+            }).ToList();
         }
 
         [RestDeleteById]

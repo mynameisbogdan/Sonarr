@@ -32,6 +32,7 @@ function SeasonInteractiveSearchModalContent(
 
       <ModalBody scrollDirection={scrollDirections.BOTH}>
         <InteractiveSearch
+          seriesId={seriesId}
           type="season"
           searchPayload={{
             seriesId,
