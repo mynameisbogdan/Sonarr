@@ -24,6 +24,7 @@ interface Release {
   indexerId: number;
   indexer: string;
   size: number;
+  infoHash?: string;
   seeders?: number;
   leechers?: number;
   quality: QualityModel;
@@ -48,6 +49,8 @@ interface Release {
   isGrabbing?: boolean;
   isGrabbed?: boolean;
   grabError?: string;
+
+  isBlocklisted?: boolean;
 }
 
 export default Release;

@@ -5,6 +5,8 @@ import AppSectionState, {
   TableAppSectionState,
 } from './AppSectionState';
 
+export type SeriesBlocklistAppState = AppSectionState<Blocklist>;
+
 interface BlocklistAppState
   extends AppSectionState<Blocklist>,
     AppSectionFilterState<Blocklist>,

@@ -1,10 +1,12 @@
-import BlocklistAppState from './BlocklistAppState';
+import BlocklistAppState, {
+  SeriesBlocklistAppState,
+} from './BlocklistAppState';
 import CalendarAppState from './CalendarAppState';
 import CaptchaAppState from './CaptchaAppState';
 import CommandAppState from './CommandAppState';
 import EpisodeFilesAppState from './EpisodeFilesAppState';
 import EpisodesAppState from './EpisodesAppState';
-import HistoryAppState from './HistoryAppState';
+import HistoryAppState, { SeriesHistoryAppState } from './HistoryAppState';
 import InteractiveImportAppState from './InteractiveImportAppState';
 import OAuthAppState from './OAuthAppState';
 import ParseAppState from './ParseAppState';
@@ -85,6 +87,8 @@ interface AppState {
   releases: ReleasesAppState;
   rootFolders: RootFolderAppState;
   series: SeriesAppState;
+  seriesBlocklist: SeriesBlocklistAppState;
+  seriesHistory: SeriesHistoryAppState;
   seriesIndex: SeriesIndexAppState;
   settings: SettingsAppState;
   system: SystemAppState;
