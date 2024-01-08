@@ -14,6 +14,8 @@ import QueueAppState from './QueueAppState';
 import ReleasesAppState from './ReleasesAppState';
 import RootFolderAppState from './RootFolderAppState';
 import SeriesAppState, { SeriesIndexAppState } from './SeriesAppState';
+import SeriesBlocklistAppState from './SeriesBlocklistAppState';
+import SeriesHistoryAppState from './SeriesHistoryAppState';
 import SettingsAppState from './SettingsAppState';
 import SystemAppState from './SystemAppState';
 import TagsAppState from './TagsAppState';
@@ -85,6 +87,8 @@ interface AppState {
   releases: ReleasesAppState;
   rootFolders: RootFolderAppState;
   series: SeriesAppState;
+  seriesBlocklist: SeriesBlocklistAppState;
+  seriesHistory: SeriesHistoryAppState;
   seriesIndex: SeriesIndexAppState;
   settings: SettingsAppState;
   system: SystemAppState;

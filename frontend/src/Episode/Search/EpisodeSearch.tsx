@@ -11,12 +11,14 @@ import translate from 'Utilities/String/translate';
 import styles from './EpisodeSearch.css';
 
 interface EpisodeSearchProps {
+  seriesId: number;
   episodeId: number;
   startInteractiveSearch: boolean;
   onModalClose: () => void;
 }
 
 function EpisodeSearch({
+  seriesId,
   episodeId,
   startInteractiveSearch,
   onModalClose,
@@ -44,7 +46,13 @@ function EpisodeSearch({
   }, []);
 
   if (isInteractiveSearchOpen) {
-    return <InteractiveSearch type="episode" searchPayload={{ episodeId }} />;
+    return (
+      <InteractiveSearch
+        seriesId={seriesId}
+        type="episode"
+        searchPayload={{ episodeId }}
+      />
+    );
   }
 
   return (

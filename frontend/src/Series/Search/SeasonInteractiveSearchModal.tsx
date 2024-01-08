@@ -6,6 +6,8 @@ import {
   cancelFetchReleases,
   clearReleases,
 } from 'Store/Actions/releaseActions';
+import { clearSeriesBlocklist } from 'Store/Actions/seriesBlocklistActions';
+import { clearSeriesHistory } from 'Store/Actions/seriesHistoryActions';
 import SeasonInteractiveSearchModalContent from './SeasonInteractiveSearchModalContent';
 
 interface SeasonInteractiveSearchModalProps {
@@ -27,12 +29,18 @@ function SeasonInteractiveSearchModal(
 
     dispatch(cancelFetchReleases());
     dispatch(clearReleases());
+
+    dispatch(clearSeriesBlocklist());
+    dispatch(clearSeriesHistory());
   }, [dispatch, onModalClose]);
 
   useEffect(() => {
     return () => {
       dispatch(cancelFetchReleases());
       dispatch(clearReleases());
+
+      dispatch(clearSeriesBlocklist());
+      dispatch(clearSeriesHistory());
     };
   }, [dispatch]);
 

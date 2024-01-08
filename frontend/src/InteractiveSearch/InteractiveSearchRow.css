@@ -64,6 +64,16 @@
   width: 75px;
 }
 
+.history {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 75px;
+}
+
+.blocklist {
+  margin-left: 5px;
+}
+
 .download {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 
