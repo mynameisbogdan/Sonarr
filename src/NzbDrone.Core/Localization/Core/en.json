@@ -142,6 +142,7 @@
   "AutomaticSearch": "Automatic Search",
   "AutomaticUpdatesDisabledDocker": "Automatic updates are not directly supported when using the Docker update mechanism. You will need to update the container image outside of {appName} or use a script",
   "Backup": "Backup",
+  "BackupFilesLocation": "Backup files are located in: {location}",
   "BackupFolderHelpText": "Relative paths will be under {appName}'s AppData directory",
   "BackupIntervalHelpText": "Interval between automatic backups",
   "BackupNow": "Backup Now",
