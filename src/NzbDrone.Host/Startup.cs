@@ -32,6 +32,7 @@ using Sonarr.Http.ClientSchema;
 using Sonarr.Http.ErrorManagement;
 using Sonarr.Http.Frontend;
 using Sonarr.Http.Middleware;
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace NzbDrone.Host
