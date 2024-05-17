@@ -57,22 +57,22 @@ namespace NzbDrone.Core.Datastore
             return expression;
         }
 
-        protected override Expression VisitMethodCall(MethodCallExpression expression)
+        protected override Expression VisitMethodCall(MethodCallExpression expression, bool not = false)
         {
             var method = expression.Method.Name;
 
             switch (expression.Method.Name)
             {
                 case "Contains":
-                    ParseContainsExpression(expression);
+                    ParseContainsExpression(expression, not);
                     break;
 
                 case "StartsWith":
-                    ParseStartsWith(expression);
+                    ParseStartsWith(expression, not);
                     break;
 
                 case "EndsWith":
-                    ParseEndsWith(expression);
+                    ParseEndsWith(expression, not);
                     break;
 
                 default:
@@ -269,22 +269,22 @@ namespace NzbDrone.Core.Datastore
             }
         }
 
-        private void ParseContainsExpression(MethodCallExpression expression)
+        private void ParseContainsExpression(MethodCallExpression expression, bool not)
         {
             var list = expression.Object;
 
             if (list != null &&
                 (list.Type == typeof(string) ||
-                (list.Type == typeof(List<string>) && !TryGetRightValue(list, out var _))))
+                (list.Type == typeof(List<string>) && !TryGetRightValue(list, out _))))
             {
-                ParseStringContains(expression);
+                ParseStringContains(expression, not);
                 return;
             }
 
-            ParseEnumerableContains(expression);
+            ParseEnumerableContains(expression, not);
         }
 
-        private void ParseEnumerableContains(MethodCallExpression body)
+        private void ParseEnumerableContains(MethodCallExpression body, bool not)
         {
             // Fish out the list and the item to compare
             // It's in a different form for arrays and Lists
@@ -313,7 +313,7 @@ namespace NzbDrone.Core.Datastore
 
             Visit(item);
 
-            _sb.Append(" IN ");
+            _sb.Append($" {(not ? "NOT " : string.Empty)}IN ");
 
             // hardcode the integer list if it exists to bypass parameter limit
             if (item.Type == typeof(int) && TryGetRightValue(list, out var value))
@@ -333,39 +333,39 @@ namespace NzbDrone.Core.Datastore
             _sb.Append(')');
         }
 
-        private void ParseStringContains(MethodCallExpression body)
+        private void ParseStringContains(MethodCallExpression body, bool not)
         {
             _sb.Append('(');
 
             Visit(body.Object);
 
-            _sb.Append(" LIKE '%' || ");
+            _sb.Append($" {(not ? "NOT " : string.Empty)}LIKE '%' || ");
 
             Visit(body.Arguments[0]);
 
             _sb.Append(" || '%')");
         }
 
-        private void ParseStartsWith(MethodCallExpression body)
+        private void ParseStartsWith(MethodCallExpression body, bool not)
         {
             _sb.Append('(');
 
             Visit(body.Object);
 
-            _sb.Append(" LIKE ");
+            _sb.Append($" {(not ? "NOT " : string.Empty)}LIKE ");
 
             Visit(body.Arguments[0]);
 
             _sb.Append(" || '%')");
         }
 
-        private void ParseEndsWith(MethodCallExpression body)
+        private void ParseEndsWith(MethodCallExpression body, bool not)
         {
             _sb.Append('(');
 
             Visit(body.Object);
 
-            _sb.Append(" LIKE '%' || ");
+            _sb.Append($" {(not ? "NOT " : string.Empty)}LIKE '%' || ");
 
             Visit(body.Arguments[0]);
 

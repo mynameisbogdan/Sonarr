@@ -16,8 +16,9 @@ namespace NzbDrone.Core.Datastore
         /// Visits expression and delegates call to different to branch.
         /// </summary>
         /// <param name="expression"></param>
+        /// <param name="not"></param>
         /// <returns></returns>
-        protected virtual Expression Visit(Expression expression)
+        protected virtual Expression Visit(Expression expression, bool not = false)
         {
             if (expression == null)
             {
@@ -34,10 +35,11 @@ namespace NzbDrone.Core.Datastore
                 case ExpressionType.Negate:
                 case ExpressionType.UnaryPlus:
                 case ExpressionType.NegateChecked:
-                case ExpressionType.Not:
                 case ExpressionType.Quote:
                 case ExpressionType.TypeAs:
                     return VisitUnary((UnaryExpression)expression);
+                case ExpressionType.Not:
+                    return VisitUnary((UnaryExpression)expression, true);
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                 case ExpressionType.And:
@@ -64,7 +66,7 @@ namespace NzbDrone.Core.Datastore
                 case ExpressionType.SubtractChecked:
                     return VisitBinary((BinaryExpression)expression);
                 case ExpressionType.Call:
-                    return VisitMethodCall((MethodCallExpression)expression);
+                    return VisitMethodCall((MethodCallExpression)expression, not);
                 case ExpressionType.Constant:
                     return VisitConstant((ConstantExpression)expression);
                 case ExpressionType.MemberAccess:
@@ -100,8 +102,9 @@ namespace NzbDrone.Core.Datastore
         /// Visits the method call expression. To be implemented by user.
         /// </summary>
         /// <param name="expression"></param>
+        /// <param name="not"></param>
         /// <returns></returns>
-        protected virtual Expression VisitMethodCall(MethodCallExpression expression)
+        protected virtual Expression VisitMethodCall(MethodCallExpression expression, bool not = false)
         {
             throw new NotImplementedException();
         }
@@ -122,10 +125,12 @@ namespace NzbDrone.Core.Datastore
         /// Visits the unary expression.
         /// </summary>
         /// <param name="expression"></param>
+        /// <param name="not"></param>
         /// <returns></returns>
-        protected virtual Expression VisitUnary(UnaryExpression expression)
+        protected virtual Expression VisitUnary(UnaryExpression expression, bool not = false)
         {
-            Visit(expression.Operand);
+            Visit(expression.Operand, not);
+
             return expression;
         }
 

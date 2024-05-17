@@ -154,9 +154,7 @@ namespace NzbDrone.Core.Tv
 
         public PagingSpec<Episode> EpisodesWithoutFiles(PagingSpec<Episode> pagingSpec)
         {
-            var episodeResult = _episodeRepository.EpisodesWithoutFiles(pagingSpec, true);
-
-            return episodeResult;
+            return _episodeRepository.EpisodesWithoutFiles(pagingSpec, true);
         }
 
         public List<Episode> GetEpisodesByFileId(int episodeFileId)

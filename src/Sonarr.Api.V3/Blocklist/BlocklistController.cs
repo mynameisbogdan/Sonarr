@@ -40,7 +40,7 @@ namespace Sonarr.Api.V3.Blocklist
                 pagingSpec.FilterExpressions.Add(b => protocols.Contains(b.Protocol));
             }
 
-            return pagingSpec.ApplyToPage(b => _blocklistService.Paged(pagingSpec), b => BlocklistResourceMapper.MapToResource(b, _formatCalculator));
+            return pagingSpec.ApplyToPage(_ => _blocklistService.Paged(pagingSpec), b => BlocklistResourceMapper.MapToResource(b, _formatCalculator));
         }
 
         [RestDeleteById]

@@ -57,7 +57,7 @@ namespace NzbDrone.Core.Datastore
             return expression;
         }
 
-        protected override Expression VisitMethodCall(MethodCallExpression expression)
+        protected override Expression VisitMethodCall(MethodCallExpression expression, bool not = false)
         {
             var method = expression.Method.Name;
 
