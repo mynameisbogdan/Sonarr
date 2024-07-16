@@ -13,7 +13,8 @@ import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import Column from 'Components/Table/Column';
 import TagListConnector from 'Components/TagListConnector';
-import { icons } from 'Helpers/Props';
+import Tooltip from 'Components/Tooltip/Tooltip';
+import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
 import EditSeriesModal from 'Series/Edit/EditSeriesModal';
 import createSeriesIndexItemSelector from 'Series/Index/createSeriesIndexItemSelector';
@@ -196,7 +197,11 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
               )}
             >
               {showBanners ? (
-                <Link className={styles.link} to={`/series/${titleSlug}`}>
+                <Link
+                  className={styles.link}
+                  to={`/series/${titleSlug}`}
+                  title={title}
+                >
                   <SeriesBanner
                     className={styles.bannerImage}
                     images={images}
@@ -211,7 +216,29 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
                   )}
                 </Link>
               ) : (
-                <SeriesTitleLink titleSlug={titleSlug} title={title} />
+                <Tooltip
+                  anchor={
+                    <SeriesTitleLink titleSlug={titleSlug} title={title} />
+                  }
+                  tooltip={
+                    <div>
+                      <SeriesBanner
+                        className={styles.bannerImage}
+                        images={images}
+                        lazy={false}
+                        overflow={true}
+                        onError={onBannerLoadError}
+                        onLoad={onBannerLoad}
+                      />
+
+                      {hasBannerError && (
+                        <div className={styles.overlayTitle}>{title}</div>
+                      )}
+                    </div>
+                  }
+                  kind={kinds.INVERSE}
+                  position={tooltipPositions.RIGHT}
+                />
               )}
             </VirtualTableRowCell>
           );
