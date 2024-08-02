@@ -123,7 +123,9 @@ namespace Sonarr.Api.V3.Series
             MapCoversToLocal(seriesResources.ToArray());
             LinkSeriesStatistics(seriesResources, seriesStats.ToDictionary(x => x.SeriesId));
             PopulateAlternateTitles(seriesResources);
-            seriesResources.ForEach(LinkRootFolderPath);
+
+            var rootFolders = _rootFolderService.All();
+            seriesResources.ForEach(resource => LinkRootFolderPath(resource, rootFolders));
 
             return seriesResources;
         }
@@ -288,9 +290,9 @@ namespace Sonarr.Api.V3.Series
             resource.AlternateTitles = mappings.ConvertAll(AlternateTitleResourceMapper.ToResource);
         }
 
-        private void LinkRootFolderPath(SeriesResource resource)
+        private void LinkRootFolderPath(SeriesResource resource, List<RootFolder> rootFolders = null)
         {
-            resource.RootFolderPath = _rootFolderService.GetBestRootFolderPath(resource.Path);
+            resource.RootFolderPath = _rootFolderService.GetBestRootFolderPath(resource.Path, rootFolders);
         }
 
         [NonAction]

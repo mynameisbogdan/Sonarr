@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.DiskSpace
         private void GivenRootFolder(string seriesPath, string rootFolderPath)
         {
             Mocker.GetMock<IRootFolderService>()
-                .Setup(v => v.GetBestRootFolderPath(seriesPath))
+                .Setup(v => v.GetBestRootFolderPath(seriesPath, null))
                 .Returns(rootFolderPath);
         }
 

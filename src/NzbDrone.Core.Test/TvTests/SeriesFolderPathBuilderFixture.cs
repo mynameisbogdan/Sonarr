@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Test.TvTests
         public void GivenExistingRootFolder(string rootFolder)
         {
             Mocker.GetMock<IRootFolderService>()
-                  .Setup(s => s.GetBestRootFolderPath(It.IsAny<string>()))
+                  .Setup(s => s.GetBestRootFolderPath(It.IsAny<string>(), null))
                   .Returns(rootFolder);
         }
 
