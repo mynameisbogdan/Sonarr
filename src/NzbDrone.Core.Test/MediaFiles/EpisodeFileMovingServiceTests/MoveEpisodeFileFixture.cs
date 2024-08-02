@@ -54,7 +54,7 @@ namespace NzbDrone.Core.Test.MediaFiles.EpisodeFileMovingServiceTests
             var rootFolder = @"C:\Test\TV\".AsOsAgnostic();
 
             Mocker.GetMock<IRootFolderService>()
-                .Setup(s => s.GetBestRootFolderPath(It.IsAny<string>()))
+                .Setup(s => s.GetBestRootFolderPath(It.IsAny<string>(), null))
                 .Returns(rootFolder);
 
             Mocker.GetMock<IDiskProvider>()
