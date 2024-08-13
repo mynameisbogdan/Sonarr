@@ -55,7 +55,9 @@ namespace NzbDrone.Core.Indexers
             {
                 Ratio = (fullSeason && useSeasonPackSeedGoal)
                     ? seedCriteria.SeasonPackSeedRatio
-                    : seedCriteria.SeedRatio
+                    : seedCriteria.SeedRatio,
+                DownloadSpeedLimit = seedCriteria.DownloadSpeedLimit,
+                UploadSpeedLimit = seedCriteria.UploadSpeedLimit,
             };
 
             var seedTime = (fullSeason && useSeasonPackSeedGoal) ? seedCriteria.SeasonPackSeedTime : seedCriteria.SeedTime;
