@@ -132,7 +132,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         protected override string AddFromTorrentFile(RemoteEpisode remoteEpisode, string hash, string filename, byte[] fileContent)
         {
-            var setShareLimits = remoteEpisode.SeedConfiguration != null && (remoteEpisode.SeedConfiguration.Ratio.HasValue || remoteEpisode.SeedConfiguration.SeedTime.HasValue);
+            var setShareLimits = remoteEpisode.SeedConfiguration != null && (remoteEpisode.SeedConfiguration.Ratio.HasValue || remoteEpisode.SeedConfiguration.SeedTime.HasValue || remoteEpisode.SeedConfiguration.DownloadSpeedLimit.HasValue || remoteEpisode.SeedConfiguration.UploadSpeedLimit.HasValue);
             var addHasSetShareLimits = setShareLimits && ProxyApiVersion >= new Version(2, 8, 1);
             var isRecentEpisode = remoteEpisode.IsRecentEpisode();
             var moveToTop = (isRecentEpisode && Settings.RecentTvPriority == (int)QBittorrentPriority.First) || (!isRecentEpisode && Settings.OlderTvPriority == (int)QBittorrentPriority.First);
