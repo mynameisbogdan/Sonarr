@@ -226,7 +226,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private void AddTorrentSeedingFormParameters(HttpRequestBuilder request, TorrentSeedConfiguration seedConfiguration, bool always = false)
         {
-            var ratioLimit = seedConfiguration.Ratio.HasValue ? seedConfiguration.Ratio : -2;
+            var ratioLimit = seedConfiguration.Ratio ?? -2;
             var seedingTimeLimit = seedConfiguration.SeedTime.HasValue ? (long)seedConfiguration.SeedTime.Value.TotalMinutes : -2;
 
             if (ratioLimit != -2 || always)
@@ -237,6 +237,16 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             if (seedingTimeLimit != -2 || always)
             {
                 request.AddFormParameter("seedingTimeLimit", seedingTimeLimit);
+            }
+
+            if (seedConfiguration.DownloadSpeedLimit is > 0)
+            {
+                request.AddFormParameter("dlLimit", seedConfiguration.DownloadSpeedLimit.Value.Megabytes());
+            }
+
+            if (seedConfiguration.UploadSpeedLimit is > 0)
+            {
+                request.AddFormParameter("upLimit", seedConfiguration.UploadSpeedLimit.Value.Megabytes());
             }
         }
 
@@ -292,7 +302,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             catch (DownloadClientException ex)
             {
                 // setShareLimits was added in api v2.0.1 so catch it case of the unlikely event that someone has api v2.0
-                if (ex.InnerException is HttpException && (ex.InnerException as HttpException).Response.StatusCode == HttpStatusCode.NotFound)
+                if (ex.InnerException is HttpException exception && exception.Response.StatusCode == HttpStatusCode.NotFound)
                 {
                     return;
                 }
@@ -314,7 +324,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             catch (DownloadClientException ex)
             {
                 // qBittorrent rejects all Prio commands with 409: Conflict if Options -> BitTorrent -> Torrent Queueing is not enabled
-                if (ex.InnerException is HttpException && (ex.InnerException as HttpException).Response.StatusCode == HttpStatusCode.Conflict)
+                if (ex.InnerException is HttpException exception && exception.Response.StatusCode == HttpStatusCode.Conflict)
                 {
                     return;
                 }

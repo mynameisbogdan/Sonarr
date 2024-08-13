@@ -213,7 +213,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             catch (DownloadClientException ex)
             {
                 // if setCategory fails due to method not being found, then try older setLabel command for qBittorrent < v.3.3.5
-                if (ex.InnerException is HttpException && (ex.InnerException as HttpException).Response.StatusCode == HttpStatusCode.NotFound)
+                if (ex.InnerException is HttpException exception && exception.Response.StatusCode == HttpStatusCode.NotFound)
                 {
                     var setLabelRequest = BuildRequest(settings).Resource("/command/setLabel")
                                                                 .Post()
@@ -255,7 +255,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             catch (DownloadClientException ex)
             {
                 // qBittorrent rejects all Prio commands with 403: Forbidden if Options -> BitTorrent -> Torrent Queueing is not enabled
-                if (ex.InnerException is HttpException && (ex.InnerException as HttpException).Response.StatusCode == HttpStatusCode.Forbidden)
+                if (ex.InnerException is HttpException exception && exception.Response.StatusCode == HttpStatusCode.Forbidden)
                 {
                     return;
                 }
