@@ -226,7 +226,7 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
 
         private void AddTorrentSeedingFormParameters(HttpRequestBuilder request, TorrentSeedConfiguration seedConfiguration, bool always = false)
         {
-            var ratioLimit = seedConfiguration.Ratio.HasValue ? seedConfiguration.Ratio : -2;
+            var ratioLimit = seedConfiguration.Ratio ?? -2;
             var seedingTimeLimit = seedConfiguration.SeedTime.HasValue ? (long)seedConfiguration.SeedTime.Value.TotalMinutes : -2;
 
             if (ratioLimit != -2 || always)
@@ -237,6 +237,16 @@ namespace NzbDrone.Core.Download.Clients.QBittorrent
             if (seedingTimeLimit != -2 || always)
             {
                 request.AddFormParameter("seedingTimeLimit", seedingTimeLimit);
+            }
+
+            if (seedConfiguration.DownloadSpeedLimit is > 0)
+            {
+                request.AddFormParameter("dlLimit", seedConfiguration.DownloadSpeedLimit.Value.Megabytes());
+            }
+
+            if (seedConfiguration.UploadSpeedLimit is > 0)
+            {
+                request.AddFormParameter("upLimit", seedConfiguration.UploadSpeedLimit.Value.Megabytes());
             }
         }
 
