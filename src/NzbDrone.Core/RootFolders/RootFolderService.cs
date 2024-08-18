@@ -32,19 +32,20 @@ namespace NzbDrone.Core.RootFolders
         private readonly Logger _logger;
 
         private readonly ICached<string> _cache;
+        private readonly ICached<List<RootFolder>> _rootFoldersCache;
 
-        private static readonly HashSet<string> SpecialFolders = new HashSet<string>
-                                                                 {
-                                                                     "$recycle.bin",
-                                                                     "system volume information",
-                                                                     "recycler",
-                                                                     "lost+found",
-                                                                     ".appledb",
-                                                                     ".appledesktop",
-                                                                     ".appledouble",
-                                                                     "@eadir",
-                                                                     ".grab"
-                                                                 };
+        private static readonly HashSet<string> SpecialFolders = new ()
+        {
+            "$recycle.bin",
+            "system volume information",
+            "recycler",
+            "lost+found",
+            ".appledb",
+            ".appledesktop",
+            ".appledouble",
+            "@eadir",
+            ".grab"
+        };
 
         public RootFolderService(IRootFolderRepository rootFolderRepository,
                                  IDiskProvider diskProvider,
@@ -60,13 +61,12 @@ namespace NzbDrone.Core.RootFolders
             _logger = logger;
 
             _cache = cacheManager.GetCache<string>(GetType());
+            _rootFoldersCache = cacheManager.GetCache<List<RootFolder>>(GetType(), "rootfolderscache");
         }
 
         public List<RootFolder> All()
         {
-            var rootFolders = _rootFolderRepository.All().ToList();
-
-            return rootFolders;
+            return _rootFoldersCache.Get("all", () => _rootFolderRepository.All().ToList(), TimeSpan.FromSeconds(30));
         }
 
         public List<RootFolder> AllWithUnmappedFolders()
@@ -124,6 +124,7 @@ namespace NzbDrone.Core.RootFolders
 
             GetDetails(rootFolder, seriesPaths, true);
             _cache.Clear();
+            _rootFoldersCache.Clear();
 
             return rootFolder;
         }
@@ -132,6 +133,7 @@ namespace NzbDrone.Core.RootFolders
         {
             _rootFolderRepository.Delete(id);
             _cache.Clear();
+            _rootFoldersCache.Clear();
         }
 
         private List<UnmappedFolder> GetUnmappedFolders(string path, Dictionary<int, string> seriesPaths)
