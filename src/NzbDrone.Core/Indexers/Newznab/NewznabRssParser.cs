@@ -91,6 +91,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             releaseInfo.TvdbId = GetTvdbId(item);
             releaseInfo.TvRageId = GetTvRageId(item);
             releaseInfo.ImdbId = GetImdbId(item);
+            releaseInfo.Files = GetFiles(item);
 
             return releaseInfo;
         }
@@ -146,6 +147,17 @@ namespace NzbDrone.Core.Indexers.Newznab
             size = GetEnclosureLength(item);
 
             return size;
+        }
+
+        protected virtual int? GetFiles(XElement item)
+        {
+            var filesString = TryGetNewznabAttribute(item, "files");
+            if (!filesString.IsNullOrWhiteSpace() && int.TryParse(filesString, out var files))
+            {
+                return files;
+            }
+
+            return null;
         }
 
         protected override DateTime GetPublishDate(XElement item)

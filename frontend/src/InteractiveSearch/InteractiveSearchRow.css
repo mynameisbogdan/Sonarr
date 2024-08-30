@@ -52,9 +52,11 @@
 }
 
 .age,
-.size {
+.size,
+.files {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 
+  text-align: right;
   white-space: nowrap;
 }
 

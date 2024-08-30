@@ -60,6 +60,7 @@ namespace NzbDrone.Core.Indexers.HDBits
                     InfoUrl = GetInfoUrl(id),
                     Seeders = result.Seeders,
                     Peers = result.Leechers + result.Seeders,
+                    Files = (int)result.NumFiles,
                     PublishDate = result.Added.ToUniversalTime(),
                     TvdbId = result.TvdbInfo?.Id ?? 0,
                     IndexerFlags = GetIndexerFlags(result)

@@ -84,6 +84,7 @@ interface InteractiveSearchRowProps {
   indexerId: number;
   indexer: string;
   size: number;
+  files?: number;
   seeders?: number;
   leechers?: number;
   quality: QualityModel;
@@ -126,6 +127,7 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     infoUrl,
     indexer,
     size,
+    files,
     seeders,
     leechers,
     quality,
@@ -241,6 +243,8 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
           <Peers seeders={seeders} leechers={leechers} />
         ) : null}
       </TableRowCell>
+
+      <TableRowCell className={styles.files}>{files}</TableRowCell>
 
       <TableRowCell className={styles.languages}>
         <EpisodeLanguages languages={languages} />

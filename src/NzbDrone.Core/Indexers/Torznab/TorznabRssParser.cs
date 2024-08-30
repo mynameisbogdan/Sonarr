@@ -83,7 +83,8 @@ namespace NzbDrone.Core.Indexers.Torznab
             {
                 torrentInfo.TvdbId = GetTvdbId(item);
                 torrentInfo.TvRageId = GetTvRageId(item);
-                releaseInfo.ImdbId = GetImdbId(item);
+                torrentInfo.ImdbId = GetImdbId(item);
+                torrentInfo.Files = GetFiles(item);
                 torrentInfo.IndexerFlags = GetFlags(item);
             }
 
@@ -135,6 +136,17 @@ namespace NzbDrone.Core.Indexers.Torznab
             size = GetEnclosureLength(item);
 
             return size;
+        }
+
+        protected virtual int? GetFiles(XElement item)
+        {
+            var filesString = TryGetTorznabAttribute(item, "files");
+            if (!filesString.IsNullOrWhiteSpace() && int.TryParse(filesString, out var files))
+            {
+                return files;
+            }
+
+            return null;
         }
 
         protected override DateTime GetPublishDate(XElement item)

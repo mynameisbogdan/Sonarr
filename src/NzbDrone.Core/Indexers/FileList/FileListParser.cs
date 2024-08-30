@@ -47,6 +47,7 @@ namespace NzbDrone.Core.Indexers.FileList
                     InfoUrl = GetInfoUrl(id),
                     Seeders = result.Seeders,
                     Peers = result.Leechers + result.Seeders,
+                    Files = (int)result.Files,
                     PublishDate = result.UploadDate.ToUniversalTime(),
                     IndexerFlags = GetIndexerFlags(result)
                 };

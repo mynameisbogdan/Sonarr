@@ -52,6 +52,12 @@ const columns = [
     isVisible: true
   },
   {
+    name: 'files',
+    label: () => translate('Files'),
+    isSortable: true,
+    isVisible: true
+  },
+  {
     name: 'languageWeight',
     label: () => translate('Languages'),
     isSortable: true,
