@@ -189,6 +189,24 @@ namespace Sonarr.Api.V3.Indexers
             return await GetRss();
         }
 
+        [HttpPost("block")]
+        [Consumes("application/json")]
+        public object BlockAction(ReleaseResource release)
+        {
+            var remoteEpisode = _remoteEpisodeCache.Find(GetCacheKey(release));
+
+            if (remoteEpisode == null)
+            {
+                _logger.Debug("Couldn't find requested release in cache, cache timeout probably expired.");
+
+                throw new NzbDroneClientException(HttpStatusCode.NotFound, "Couldn't find requested release in cache, try searching again");
+            }
+
+            _blocklistService.Block(remoteEpisode, "Release manually blocklisted");
+
+            return new { };
+        }
+
         private async Task<List<ReleaseResource>> GetEpisodeReleases(int episodeId)
         {
             try

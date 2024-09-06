@@ -154,6 +154,8 @@
   "BlackholeFolderHelpText": "Folder in which {appName} will store the {extension} file",
   "BlackholeWatchFolder": "Watch Folder",
   "BlackholeWatchFolderHelpText": "Folder from which {appName} should import completed downloads",
+  "BlockRelease": "Block Release",
+  "BlockReleaseConfirmation": "Are you sure you want to block release '{title}'?",
   "Blocklist": "Blocklist",
   "BlocklistAndSearch": "Blocklist and Search",
   "BlocklistAndSearchHint": "Start a search for a replacement after blocklisting",

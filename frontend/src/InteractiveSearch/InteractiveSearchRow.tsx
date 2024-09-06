@@ -15,9 +15,12 @@ import EpisodeFormats from 'Episode/EpisodeFormats';
 import EpisodeLanguages from 'Episode/EpisodeLanguages';
 import EpisodeQuality from 'Episode/EpisodeQuality';
 import IndexerFlags from 'Episode/IndexerFlags';
+import useModalOpenState from 'Helpers/Hooks/useModalOpenState';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import InteractiveSearchPayload from 'InteractiveSearch/InteractiveSearchPayload';
+import { blocklistRelease } from 'Store/Actions/releaseActions';
+import { fetchSeriesBlocklist } from 'Store/Actions/seriesBlocklistActions';
 import { fetchSeriesHistory } from 'Store/Actions/seriesHistoryActions';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import Release from 'typings/Release';
@@ -162,7 +165,9 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     isGrabbing = false,
     isGrabbed = false,
     grabError,
+    isBlocklisting = false,
     isBlocklisted = false,
+    blocklistError,
     searchPayload,
     onGrabPress,
   } = props;
@@ -174,8 +179,14 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
 
   const [isConfirmGrabModalOpen, setIsConfirmGrabModalOpen] = useState(false);
   const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
+  const [
+    isBlockReleaseModalOpen,
+    setBlockReleaseModalOpen,
+    setBlockReleaseModalClosed,
+  ] = useModalOpenState(false);
 
   const previousIsGrabbing = usePrevious(isGrabbing);
+  const previousIsBlocklisting = usePrevious(isBlocklisting);
 
   const dispatch = useDispatch();
 
@@ -220,11 +231,34 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     setIsOverrideModalOpen(false);
   }, [setIsOverrideModalOpen]);
 
+  const handleBlocklistReleasePress = useCallback(() => {
+    dispatch(
+      blocklistRelease({
+        guid,
+        indexerId,
+      })
+    );
+
+    setBlockReleaseModalClosed();
+  }, [guid, indexerId, setBlockReleaseModalClosed, dispatch]);
+
   useEffect(() => {
     if (previousIsGrabbing && !isGrabbing) {
       dispatch(fetchSeriesHistory({ seriesId }));
     }
   }, [seriesId, previousIsGrabbing, isGrabbing, dispatch]);
+
+  useEffect(() => {
+    if (previousIsBlocklisting && !isBlocklisting && !blocklistError) {
+      dispatch(fetchSeriesBlocklist({ seriesId }));
+    }
+  }, [
+    seriesId,
+    previousIsBlocklisting,
+    isBlocklisting,
+    blocklistError,
+    dispatch,
+  ]);
 
   return (
     <TableRow>
@@ -414,6 +448,17 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
             />
           </div>
         </Link>
+
+        {isBlocklisted ? null : (
+          <SpinnerIconButton
+            name={icons.REMOVE}
+            kind={blocklistError ? kinds.DANGER : kinds.DEFAULT}
+            title={translate('BlockRelease')}
+            size={14}
+            isSpinning={isBlocklisting}
+            onPress={setBlockReleaseModalOpen}
+          />
+        )}
       </TableRowCell>
 
       <ConfirmModal
@@ -442,6 +487,16 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
         isGrabbing={isGrabbing}
         grabError={grabError}
         onModalClose={onOverrideModalClose}
+      />
+
+      <ConfirmModal
+        isOpen={isBlockReleaseModalOpen}
+        kind={kinds.DANGER}
+        title={translate('BlockRelease')}
+        message={translate('BlockReleaseConfirmation', { title })}
+        confirmLabel={translate('BlockRelease')}
+        onConfirm={handleBlocklistReleasePress}
+        onCancel={setBlockReleaseModalClosed}
       />
     </TableRow>
   );

@@ -286,6 +286,7 @@ export const GRAB_RELEASE = 'releases/grabRelease';
 export const UPDATE_RELEASE = 'releases/updateRelease';
 export const SET_EPISODE_RELEASES_FILTER = 'releases/setEpisodeReleasesFilter';
 export const SET_SEASON_RELEASES_FILTER = 'releases/setSeasonReleasesFilter';
+export const BLOCKLIST_RELEASE = 'releases/blocklistRelease';
 
 //
 // Action Creators
@@ -298,6 +299,7 @@ export const grabRelease = createThunk(GRAB_RELEASE);
 export const updateRelease = createAction(UPDATE_RELEASE);
 export const setEpisodeReleasesFilter = createAction(SET_EPISODE_RELEASES_FILTER);
 export const setSeasonReleasesFilter = createAction(SET_SEASON_RELEASES_FILTER);
+export const blocklistRelease = createThunk(BLOCKLIST_RELEASE);
 
 //
 // Helpers
@@ -351,6 +353,40 @@ export const actionHandlers = handleThunks({
         isGrabbing: false,
         isGrabbed: false,
         grabError
+      }));
+    });
+  },
+
+  [BLOCKLIST_RELEASE]: function(getState, payload, dispatch) {
+    const { guid } = payload;
+
+    dispatch(updateRelease({ guid, isBlocklisting: true }));
+
+    const promise = createAjaxRequest({
+      url: '/release/block',
+      method: 'POST',
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify(payload)
+    }).request;
+
+    promise.done(() => {
+      dispatch(updateRelease({
+        guid,
+        isBlocklisting: false,
+        isBlocklisted: true,
+        blocklistError: null
+      }));
+    });
+
+    promise.fail((xhr) => {
+      const blocklistError = xhr.responseJSON && xhr.responseJSON.message || 'Failed to block release';
+
+      dispatch(updateRelease({
+        guid,
+        isBlocklisting: false,
+        isBlocklisted: false,
+        blocklistError
       }));
     });
   }

@@ -50,7 +50,9 @@ interface Release {
   isGrabbed?: boolean;
   grabError?: string;
 
+  isBlocklisting?: boolean;
   isBlocklisted?: boolean;
+  blocklistError?: string;
 }
 
 export default Release;
