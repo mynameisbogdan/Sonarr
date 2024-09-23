@@ -17,6 +17,8 @@ interface CssExports {
   'quality': string;
   'rejected': string;
   'sceneMapping': string;
+  'scoreNegative': string;
+  'scorePositive': string;
   'size': string;
   'titleContent': string;
 }
