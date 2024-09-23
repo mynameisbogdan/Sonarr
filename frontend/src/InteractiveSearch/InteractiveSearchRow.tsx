@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
@@ -164,7 +165,12 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
   }, [setIsOverrideModalOpen]);
 
   return (
-    <TableRow>
+    <TableRow
+      className={classNames(
+        customFormats.length && customFormatScore > 0 && styles.scorePositive,
+        customFormats.length && customFormatScore < 0 && styles.scoreNegative
+      )}
+    >
       <TableRowCell className={styles.protocol}>
         <ProtocolLabel protocol={protocol} />
       </TableRowCell>

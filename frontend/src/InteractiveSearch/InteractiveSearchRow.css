@@ -1,3 +1,11 @@
+.scorePositive {
+  background-color: rgba(86, 175, 105, 0.1);
+}
+
+.scoreNegative {
+  background-color: rgba(220, 104, 104, 0.1);
+}
+
 .protocol {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 
