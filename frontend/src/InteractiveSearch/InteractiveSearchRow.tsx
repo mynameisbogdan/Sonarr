@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
@@ -233,7 +234,13 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
   }, [seriesId, previousIsGrabbing, isGrabbing, dispatch]);
 
   return (
-    <TableRow>
+    <TableRow
+      className={classNames(
+        styles.row,
+        customFormats.length && customFormatScore > 0 && styles.positiveScore,
+        customFormats.length && customFormatScore < 0 && styles.negativeScore
+      )}
+    >
       <TableRowCell className={styles.protocol}>
         <ProtocolLabel protocol={protocol} />
       </TableRowCell>
