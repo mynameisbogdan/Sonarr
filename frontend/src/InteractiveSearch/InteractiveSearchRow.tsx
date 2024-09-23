@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React, {
   useCallback,
   useLayoutEffect,
@@ -205,7 +206,15 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
   const { height: _height, ...positionStyle } = style;
 
   return (
-    <div ref={rowRef} className={styles.row} style={positionStyle}>
+    <div
+      ref={rowRef}
+      className={classNames(
+        styles.row,
+        customFormats.length && customFormatScore > 0 && styles.positiveScore,
+        customFormats.length && customFormatScore < 0 && styles.negativeScore
+      )}
+      style={positionStyle}
+    >
       <VirtualTableRowCell className={styles.protocol}>
         <ProtocolLabel protocol={protocol} />
       </VirtualTableRowCell>
