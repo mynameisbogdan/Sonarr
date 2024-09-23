@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
 import Link from 'Components/Link/Link';
@@ -75,7 +76,13 @@ function InteractiveSearchCard(props: InteractiveSearchCardProps) {
   }, [mappedEpisodeInfo]);
 
   return (
-    <div className={styles.card}>
+    <div
+      className={classNames(
+        styles.card,
+        customFormats.length && customFormatScore > 0 && styles.positiveScore,
+        customFormats.length && customFormatScore < 0 && styles.negativeScore
+      )}
+    >
       <div className={styles.title}>
         <Link to={infoUrl}>
           <ReleaseTitle title={title} />
