@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React, { useCallback, useMemo, useState } from 'react';
 import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
 import Icon from 'Components/Icon';
@@ -175,7 +176,13 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
   }, [setIsOverrideModalOpen]);
 
   return (
-    <TableRow>
+    <TableRow
+      className={classNames(
+        styles.row,
+        customFormats.length && customFormatScore > 0 && styles.positiveScore,
+        customFormats.length && customFormatScore < 0 && styles.negativeScore
+      )}
+    >
       <TableRowCell className={styles.protocol}>
         <ProtocolLabel protocol={protocol} />
       </TableRowCell>
