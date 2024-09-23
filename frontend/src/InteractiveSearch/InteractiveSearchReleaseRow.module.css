@@ -7,6 +7,14 @@
   background-color: var(--cardBackgroundColor);
   color: var(--ink);
   gap: var(--columnGap);
+
+  &.positiveScore:not(:hover) {
+    background-color: rgba(86, 175, 105, 0.1);
+  }
+
+  &.negativeScore:not(:hover) {
+    background-color: rgba(220, 104, 104, 0.1);
+  }
 }
 
 .release {
