@@ -2,6 +2,7 @@ import React from 'react';
 import DescriptionList from 'Components/DescriptionList/DescriptionList';
 import DescriptionListItem from 'Components/DescriptionList/DescriptionListItem';
 import MediaInfoProps from 'typings/MediaInfo';
+import formatBitrate from 'Utilities/Number/formatBitrate';
 import getEntries from 'Utilities/Object/getEntries';
 
 function MediaInfo(props: MediaInfoProps) {
@@ -16,9 +17,11 @@ function MediaInfo(props: MediaInfoProps) {
           return null;
         }
 
-        return (
-          <DescriptionListItem key={key} title={title} data={props[key]} />
-        );
+        if (key === 'audioBitrate' || key === 'videoBitrate') {
+          value = formatBitrate(value);
+        }
+
+        return <DescriptionListItem key={key} title={title} data={value} />;
       })}
     </DescriptionList>
   );
