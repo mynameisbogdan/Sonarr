@@ -47,7 +47,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
             if (singleEpisodeSpec.SeasonNumber != remoteEpisode.ParsedEpisodeInfo.SeasonNumber)
             {
                 _logger.Debug("Season number does not match searched season number, skipping.");
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.WrongSeason, "Wrong season");
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.WrongSeason, "Wrong season. Expected {0}, but got {1}.", singleEpisodeSpec.SeasonNumber, remoteEpisode.ParsedEpisodeInfo.SeasonNumber);
             }
 
             if (!remoteEpisode.ParsedEpisodeInfo.EpisodeNumbers.Any())
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.Search
             if (!remoteEpisode.ParsedEpisodeInfo.EpisodeNumbers.Contains(singleEpisodeSpec.EpisodeNumber))
             {
                 _logger.Debug("Episode number does not match searched episode number, skipping.");
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.WrongEpisode, "Wrong episode");
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.WrongEpisode, "Wrong episode. Expected {0}, but got {1}", singleEpisodeSpec.EpisodeNumber, string.Join(", ", remoteEpisode.ParsedEpisodeInfo.EpisodeNumbers));
             }
 
             return DownloadSpecDecision.Accept();
