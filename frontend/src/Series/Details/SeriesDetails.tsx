@@ -37,7 +37,7 @@ import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
 import EditSeriesModal from 'Series/Edit/EditSeriesModal';
 import SeriesHistoryModal from 'Series/History/SeriesHistoryModal';
 import MonitoringOptionsModal from 'Series/MonitoringOptions/MonitoringOptionsModal';
-import { Image, Statistics } from 'Series/Series';
+import Series, { Image, Statistics } from 'Series/Series';
 import SeriesGenres from 'Series/SeriesGenres';
 import SeriesPoster from 'Series/SeriesPoster';
 import { getSeriesStatusDetails } from 'Series/SeriesStatus';
@@ -56,8 +56,8 @@ import {
 import { toggleSeriesMonitored } from 'Store/Actions/seriesActions';
 import createAllSeriesSelector from 'Store/Selectors/createAllSeriesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
+import createSeriesClientSideCollectionItemsSelector from 'Store/Selectors/createSeriesClientSideCollectionItemsSelector';
 import fonts from 'Styles/Variables/fonts';
-import sortByProp from 'Utilities/Array/sortByProp';
 import { findCommand, isCommandExecuting } from 'Utilities/Command';
 import formatBytes from 'Utilities/Number/formatBytes';
 import {
@@ -126,6 +126,8 @@ function createEpisodeFilesSelector() {
   );
 }
 
+type SeriesCollectionItem = Pick<Series, 'id' | 'sortTitle'>;
+
 interface ExpandedState {
   allExpanded: boolean;
   allCollapsed: boolean;
@@ -141,6 +143,8 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
 
   const series = useSeries(seriesId);
   const allSeries = useSelector(createAllSeriesSelector());
+  const { items: allSeriesCollection }: { items: SeriesCollectionItem[] } =
+    useSelector(createSeriesClientSideCollectionItemsSelector('seriesIndex'));
 
   const {
     isEpisodesFetching,
@@ -205,10 +209,8 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
   }, [seriesId, commands]);
 
   const { nextSeries, previousSeries } = useMemo(() => {
-    const sortedSeries = [...allSeries].sort(sortByProp('sortTitle'));
-    const seriesIndex = sortedSeries.findIndex(
-      (series) => series.id === seriesId
-    );
+    const seriesIds = allSeriesCollection.map(({ id }) => id);
+    const seriesIndex = seriesIds.findIndex((id) => id === seriesId);
 
     if (seriesIndex === -1) {
       return {
@@ -217,21 +219,24 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
       };
     }
 
-    const nextSeries = sortedSeries[seriesIndex + 1] ?? sortedSeries[0];
-    const previousSeries =
-      sortedSeries[seriesIndex - 1] ?? sortedSeries[sortedSeries.length - 1];
+    const nextSeriesId = seriesIds[seriesIndex + 1] ?? seriesIds[0];
+    const previousSeriesId =
+      seriesIds[seriesIndex - 1] ?? seriesIds[seriesIds.length - 1];
+
+    const nextSeries = allSeries.find(({ id }) => id === nextSeriesId);
+    const previousSeries = allSeries.find(({ id }) => id === previousSeriesId);
 
     return {
       nextSeries: {
-        title: nextSeries.title,
-        titleSlug: nextSeries.titleSlug,
+        title: nextSeries?.title,
+        titleSlug: nextSeries?.titleSlug,
       },
       previousSeries: {
-        title: previousSeries.title,
-        titleSlug: previousSeries.titleSlug,
+        title: previousSeries?.title,
+        titleSlug: previousSeries?.titleSlug,
       },
     };
-  }, [seriesId, allSeries]);
+  }, [seriesId, allSeries, allSeriesCollection]);
 
   const [isOrganizeModalOpen, setIsOrganizeModalOpen] = useState(false);
   const [isManageEpisodesOpen, setIsManageEpisodesOpen] = useState(false);
@@ -607,7 +612,7 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
                 </div>
 
                 <div className={styles.seriesNavigationButtons}>
-                  {previousSeries ? (
+                  {previousSeries?.titleSlug && previousSeries?.title ? (
                     <IconButton
                       className={styles.seriesNavigationButton}
                       name={icons.ARROW_LEFT}
@@ -619,7 +624,7 @@ function SeriesDetails({ seriesId }: SeriesDetailsProps) {
                     />
                   ) : null}
 
-                  {nextSeries ? (
+                  {nextSeries?.titleSlug && nextSeries?.title ? (
                     <IconButton
                       className={styles.seriesNavigationButton}
                       name={icons.ARROW_RIGHT}
