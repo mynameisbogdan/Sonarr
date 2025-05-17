@@ -23,6 +23,7 @@ import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import removeOldSelectedState from 'Utilities/Table/removeOldSelectedState';
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
+import MissingOptions from './MissingOptions';
 import MissingRowConnector from './MissingRowConnector';
 
 function getMonitoredValue(props) {
@@ -190,6 +191,7 @@ class Missing extends Component {
             <TableOptionsModalWrapper
               {...otherProps}
               columns={columns}
+              optionsComponent={MissingOptions}
             >
               <PageToolbarButton
                 label={translate('Options')}
@@ -236,6 +238,7 @@ class Missing extends Component {
                   allSelected={allSelected}
                   allUnselected={allUnselected}
                   {...otherProps}
+                  optionsComponent={MissingOptions}
                   onSelectAllChange={this.onSelectAllChange}
                 >
                   <TableBody>
