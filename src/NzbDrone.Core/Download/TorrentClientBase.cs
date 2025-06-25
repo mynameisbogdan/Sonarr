@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using MonoTorrent;
 using NLog;
 using NzbDrone.Common.Disk;
@@ -221,14 +222,18 @@ namespace NzbDrone.Core.Download
 
             try
             {
-                hash = MagnetLink.Parse(magnetUrl).InfoHashes.V1OrV2.ToHex();
+                var parsedMagnetLink = MagnetLink.Parse(magnetUrl);
+                hash = parsedMagnetLink.InfoHashes.V1OrV2.ToHex();
+
+                // Recreate magnet link in attempt to avoid badly encoded names
+                magnetUrl = new MagnetLink(parsedMagnetLink.InfoHashes.V1OrV2, HttpUtility.HtmlDecode(parsedMagnetLink.Name), parsedMagnetLink.AnnounceUrls, parsedMagnetLink.Webseeds, parsedMagnetLink.Size).ToV1String();
             }
             catch (FormatException ex)
             {
                 throw new ReleaseDownloadException(remoteEpisode.Release, "Failed to parse magnetlink for episode '{0}': '{1}'", ex, remoteEpisode.Release.Title, magnetUrl);
             }
 
-            if (hash != null)
+            if (hash is not null)
             {
                 EnsureReleaseIsNotBlocklisted(remoteEpisode, indexer, hash);
 
