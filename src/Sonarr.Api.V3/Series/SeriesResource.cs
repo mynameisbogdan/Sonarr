@@ -130,7 +130,7 @@ namespace Sonarr.Api.V3.Series
                        SeriesType = model.SeriesType,
                        CleanTitle = model.CleanTitle,
                        ImdbId = model.ImdbId,
-                       TitleSlug = model.TitleSlug,
+                       TitleSlug = model.TvdbId.ToString(),
 
                        // Root folder path needs to be calculated from the series path
                        // RootFolderPath = model.RootFolderPath,
