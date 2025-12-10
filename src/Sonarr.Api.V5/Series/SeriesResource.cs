@@ -97,7 +97,7 @@ public static class SeriesResourceMapper
             SeriesType = model.SeriesType,
             CleanTitle = model.CleanTitle,
             ImdbId = model.ImdbId,
-            TitleSlug = model.TitleSlug,
+            TitleSlug = model.TvdbId.ToString(),
             Certification = model.Certification,
             Genres = model.Genres,
             Tags = model.Tags,
