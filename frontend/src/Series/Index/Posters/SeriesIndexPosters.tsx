@@ -176,6 +176,7 @@ export default function SeriesIndexPosters(props: SeriesIndexPostersProps) {
       case 'added':
       case 'path':
       case 'sizeOnDisk':
+      case 'ratings':
         heights.push(19);
         break;
       case 'qualityProfileId':

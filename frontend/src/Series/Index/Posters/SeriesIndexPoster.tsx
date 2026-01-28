@@ -63,6 +63,7 @@ function SeriesIndexPoster(props: SeriesIndexPosterProps) {
     added,
     statistics = {} as Statistics,
     images,
+    ratings,
     tags,
   } = series;
 
@@ -266,6 +267,7 @@ function SeriesIndexPoster(props: SeriesIndexPosterProps) {
         timeFormat={timeFormat}
         tags={tags}
         showTags={showTags}
+        ratings={ratings}
       />
 
       <EditSeriesModal
