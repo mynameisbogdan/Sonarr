@@ -80,6 +80,7 @@ const SeriesIndexOverviewInfo = forwardRef<
           showRelativeDates,
           timeFormat,
           timeForToday: true,
+          includeTime: true,
         })}
       </span>
     );
@@ -126,6 +127,7 @@ const SeriesIndexOverviewInfo = forwardRef<
           showRelativeDates,
           timeFormat,
           timeForToday: true,
+          includeTime: true,
         })}
       </span>
     );
