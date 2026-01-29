@@ -280,6 +280,7 @@ function SeriesIndexPoster(props: SeriesIndexPosterProps) {
             showRelativeDates,
             timeFormat,
             timeForToday: true,
+            includeTime: true,
           })}
         </div>
       ) : null}
