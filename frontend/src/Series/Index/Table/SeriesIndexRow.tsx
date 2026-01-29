@@ -283,6 +283,7 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
               key={name}
               className={styles[name]}
               date={nextAiring}
+              includeTime={true}
               component={VirtualTableRowCell}
             />
           );
@@ -296,6 +297,7 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
               key={name}
               className={styles[name]}
               date={previousAiring}
+              includeTime={true}
               component={VirtualTableRowCell}
             />
           );
