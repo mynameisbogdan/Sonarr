@@ -180,6 +180,7 @@ class EpisodeRow extends Component {
                 <RelativeDateCell
                   key={name}
                   date={airDateUtc}
+                  includeTime={true}
                 />
               );
             }
