@@ -247,6 +247,7 @@ function SeriesIndexOverviewInfo(props: SeriesIndexOverviewInfoProps) {
             showRelativeDates,
             timeFormat,
             timeForToday: true,
+            includeTime: true,
           })}
         />
       )}
