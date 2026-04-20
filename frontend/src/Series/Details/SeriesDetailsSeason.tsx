@@ -120,7 +120,7 @@ function SeriesDetailsSeason({
   const isSmallScreen = useAppDimension('isSmallScreen');
   const isSearching = useIsSearching(seriesId, seasonNumber);
 
-  const { sizeOnDisk = 0 } = statistics;
+  const { sizeOnDisk = 0, episodeFileQualities = [] } = statistics;
 
   const {
     episodeCount,
@@ -324,6 +324,16 @@ function SeriesDetailsSeason({
                 size="large"
               >
                 {formatBytes(sizeOnDisk)}
+              </Label>
+            ) : null}
+
+            {episodeFileQualities.length > 0 ? (
+              <Label
+                className={styles.seasonStatsLabel}
+                kind="inverse"
+                size="large"
+              >
+                {episodeFileQualities.map(({ name }) => name).join(', ')}
               </Label>
             ) : null}
           </div>
