@@ -63,7 +63,8 @@
   gap: 8px;
 }
 
-.seasonStatsLabel {
+.seasonStatsLabel,
+.qualitiesSeasonStatsLabel {
   composes: label from 'Components/Label.module.css';
 
   display: inline-flex;
@@ -260,6 +261,10 @@
   .seasonTitle {
     max-width: 100%;
     font-size: 12px;
+  }
+
+  .qualitiesSeasonStatsLabel {
+    display: none;
   }
 
   .expandButton {
