@@ -26,7 +26,7 @@ public class ReleasePushController : RestController<ReleasePushResource>
 
     private readonly QualityProfile _qualityProfile;
 
-    private static readonly object PushLock = new object();
+    private readonly SemaphoreSlim _pushLock = new(1, 1);
 
     public ReleasePushController(IMakeDownloadDecision downloadDecisionMaker,
                              IProcessDownloadDecisions downloadDecisionProcessor,
@@ -52,7 +52,7 @@ public class ReleasePushController : RestController<ReleasePushResource>
 
     [HttpPost]
     [Consumes("application/json")]
-    public Results<Ok<ReleaseResource>, BadRequest> Create([FromBody] ReleasePushResource release)
+    public async Task<Results<Ok<ReleaseResource>, BadRequest>> Create([FromBody] ReleasePushResource release, CancellationToken cancellationToken = default)
     {
         _logger.Info("Release pushed: {0} - {1}", release.Title, release.DownloadUrl ?? release.MagnetUrl);
 
@@ -68,13 +68,19 @@ public class ReleasePushController : RestController<ReleasePushResource>
 
         DownloadDecision? decision;
 
-        lock (PushLock)
+        await _pushLock.WaitAsync(cancellationToken);
+
+        try
         {
-            var decisions = _downloadDecisionMaker.GetRssDecision(new List<ReleaseInfo> { info }, true);
+            var decisions = _downloadDecisionMaker.GetRssDecision([info], true);
 
             decision = decisions.FirstOrDefault();
 
-            _downloadDecisionProcessor.ProcessDecision(decision, downloadClientId).GetAwaiter().GetResult();
+            await _downloadDecisionProcessor.ProcessDecision(decision, downloadClientId);
+        }
+        finally
+        {
+            _pushLock.Release();
         }
 
         if (decision?.RemoteEpisode.ParsedEpisodeInfo == null)
