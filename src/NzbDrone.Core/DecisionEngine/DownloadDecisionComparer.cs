@@ -32,6 +32,7 @@ namespace NzbDrone.Core.DecisionEngine
                 CompareQuality,
                 CompareCustomFormatScore,
                 CompareProtocol,
+                CompareEpisodeRequested,
                 CompareEpisodeCount,
                 CompareEpisodeNumber,
                 CompareIndexerPriority,
@@ -106,6 +107,11 @@ namespace NzbDrone.Core.DecisionEngine
             });
 
             return result;
+        }
+
+        private int CompareEpisodeRequested(DownloadDecision x, DownloadDecision y)
+        {
+            return CompareBy(x.RemoteEpisode, y.RemoteEpisode, remoteEpisode => remoteEpisode.EpisodeRequested);
         }
 
         private int CompareEpisodeCount(DownloadDecision x, DownloadDecision y)
