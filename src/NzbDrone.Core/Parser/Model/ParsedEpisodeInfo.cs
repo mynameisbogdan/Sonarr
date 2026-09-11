@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Qualities;
@@ -13,7 +14,16 @@ namespace NzbDrone.Core.Parser.Model
         public string SeriesTitle { get; set; }
         public SeriesTitleInfo SeriesTitleInfo { get; set; }
         public QualityModel Quality { get; set; }
-        public int SeasonNumber { get; set; }
+        public int[] SeasonNumbers { get; set; } = [];
+
+        // TODO: Remove this once `SeasonNumbers` replaces `SeasonNumber`
+        [JsonPropertyOrder(-1)]
+        public int SeasonNumber
+        {
+            get => SeasonNumbers.FirstOrDefault(0);
+            set => SeasonNumbers = [value];
+        }
+
         public int[] EpisodeNumbers { get; set; }
         public int[] AbsoluteEpisodeNumbers { get; set; }
         public decimal[] SpecialAbsoluteEpisodeNumbers { get; set; }
@@ -21,7 +31,7 @@ namespace NzbDrone.Core.Parser.Model
         public List<Language> Languages { get; set; }
         public bool FullSeason { get; set; }
         public bool IsPartialSeason { get; set; }
-        public bool IsMultiSeason { get; set; }
+        public bool IsMultiSeason => SeasonNumbers.Length > 1;
         public bool IsSeasonExtra { get; set; }
         public bool IsSplitEpisode { get; set; }
         public bool IsMiniSeries { get; set; }
@@ -124,7 +134,9 @@ namespace NzbDrone.Core.Parser.Model
             }
             else if (FullSeason)
             {
-                episodeString = string.Format("Season {0:00}", SeasonNumber);
+                episodeString = IsMultiSeason
+                    ? string.Format("Season {0:00}-{1:00}", SeasonNumbers.First(), SeasonNumbers.Last())
+                    : string.Format("Season {0:00}", SeasonNumber);
             }
             else if (EpisodeNumbers != null && EpisodeNumbers.Any())
             {
