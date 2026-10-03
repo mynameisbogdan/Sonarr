@@ -19,7 +19,10 @@ namespace NzbDrone.Core.ImportLists.Rss
 
         private IEnumerable<ImportListRequest> GetSeriesRequest()
         {
-            yield return new ImportListRequest(Settings.Url, HttpAccept.Rss);
+            yield return new ImportListRequest(new HttpRequest(Settings.Url, HttpAccept.Rss)
+            {
+                AllowAutoRedirect = true
+            });
         }
     }
 }
