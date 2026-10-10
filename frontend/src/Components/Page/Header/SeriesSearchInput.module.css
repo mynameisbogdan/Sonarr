@@ -96,21 +96,19 @@
   transform: translateX(-50%);
 }
 
-.seriesContainer {
+.list {
   @add-mixin scrollbar;
   @add-mixin scrollbarTrack;
   @add-mixin scrollbarThumb;
-}
 
-.dropdown .seriesContainer {
-  overflow-y: auto;
-  max-height: 368px;
-}
-
-.list {
   margin: 0;
   padding-left: 0;
   list-style-type: none;
+
+  .dropdown & {
+    overflow-y: auto;
+    max-height: 368px;
+  }
 }
 
 .listItem {
