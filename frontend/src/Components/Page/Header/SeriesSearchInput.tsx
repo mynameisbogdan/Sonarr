@@ -11,6 +11,7 @@ import React, {
 } from 'react';
 import Autosuggest, {
   RenderSuggestionsContainerParams,
+  ThemeKey,
 } from 'react-autosuggest';
 import { useNavigate } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
@@ -200,8 +201,8 @@ function SeriesSearchInput() {
     inputRef.current?.focus();
   }, []);
 
-  const getSectionSuggestions = useCallback((section: Section) => {
-    return section.suggestions;
+  const getSectionSuggestions = useCallback((section: Section | undefined) => {
+    return section?.suggestions ?? [];
   }, []);
 
   const renderSectionTitle = useCallback((section: Section) => {
@@ -374,9 +375,8 @@ function SeriesSearchInput() {
     onBlur: handleBlur,
   };
 
-  const theme = {
+  const theme: Partial<Record<ThemeKey, string>> = {
     container: styles.container,
-    suggestionsContainer: styles.seriesContainer,
     suggestionsList: styles.list,
     suggestion: styles.listItem,
     suggestionHighlighted: styles.highlighted,
