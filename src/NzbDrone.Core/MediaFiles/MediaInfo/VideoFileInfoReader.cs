@@ -58,12 +58,12 @@ namespace NzbDrone.Core.MediaFiles.MediaInfo
             {
                 _logger.Debug("Getting media info from {0}", filename);
 
-                var analysis = FFProbe.Analyse(filename, customArguments: "-probesize 50000000");
+                var analysis = FFProbe.Analyse(filename, customArguments: "-print_format json=compact=1 -probesize 50000000");
                 var primaryVideoStream = GetPrimaryVideoStream(analysis);
 
                 if (analysis.PrimaryAudioStream?.ChannelLayout.IsNullOrWhiteSpace() ?? true)
                 {
-                    analysis = FFProbe.Analyse(filename, customArguments: "-probesize 150000000 -analyzeduration 150000000");
+                    analysis = FFProbe.Analyse(filename, customArguments: "-print_format json=compact=1 -probesize 150000000 -analyzeduration 150000000");
                 }
 
                 var mediaInfoModel = new MediaInfoModel();
