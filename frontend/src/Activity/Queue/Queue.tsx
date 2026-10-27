@@ -131,6 +131,11 @@ function QueueContent() {
 
   const isRefreshing =
     isLoading || isEpisodesFetching || isRefreshMonitoredDownloadsExecuting;
+  console.debug({
+    isLoading,
+    isEpisodesFetching,
+    isRefreshMonitoredDownloadsExecuting,
+  });
 
   // Use isLoading over isFetched to avoid losing the table UI when switching pages
   const isAllPopulated =
