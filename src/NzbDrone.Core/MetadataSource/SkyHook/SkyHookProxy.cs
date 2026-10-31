@@ -249,7 +249,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
                 series.AirTime = string.Format("{0:00}:{1:00}", show.TimeOfDay.Hours, show.TimeOfDay.Minutes);
             }
 
-            series.TitleSlug = show.Slug;
+            series.TitleSlug = show.Title.ToUrlSlug();
             series.Status = MapSeriesStatus(show.Status);
             series.Ratings = MapRatings(show.Rating);
             series.Genres = show.Genres;
