@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Newtonsoft.Json;
 using NzbDrone.Common.Http;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.IndexerSearch.Definitions;
@@ -163,14 +162,25 @@ namespace NzbDrone.Core.Indexers.HDBits
             query.Username = Settings.Username;
             query.Passkey = Settings.ApiKey;
 
-            query.Category = Settings.Categories.ToArray();
-            query.Codec = Settings.Codecs.ToArray();
-            query.Medium = Settings.Mediums.ToArray();
+            if (Settings.Categories.Any())
+            {
+                query.Category = Settings.Categories.ToArray();
+            }
+
+            if (Settings.Codecs.Any())
+            {
+                query.Codec = Settings.Codecs.ToArray();
+            }
+
+            if (Settings.Mediums.Any())
+            {
+                query.Medium = Settings.Mediums.ToArray();
+            }
 
             query.Limit = 100;
 
-            request.SetContent(query.ToJson());
-            request.ContentSummary = query.ToJson(Formatting.None);
+            request.SetContent(STJson.ToJson(query));
+            request.ContentSummary = STJson.ToJson(query, false);
 
             yield return new IndexerRequest(request);
         }
