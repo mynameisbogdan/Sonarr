@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using NzbDrone.Common.Http;
+using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Indexers.Exceptions;
 using NzbDrone.Core.Parser.Model;
 
@@ -28,7 +29,7 @@ namespace NzbDrone.Core.Indexers.HDBits
                     indexerResponse.HttpResponse.StatusCode);
             }
 
-            var jsonResponse = JsonConvert.DeserializeObject<HDBitsResponse>(indexerResponse.Content);
+            var jsonResponse = STJson.Deserialize<HDBitsResponse>(indexerResponse.HttpResponse.Content);
 
             if (jsonResponse.Status != StatusCode.Success)
             {
@@ -38,13 +39,13 @@ namespace NzbDrone.Core.Indexers.HDBits
                     jsonResponse.Message ?? string.Empty);
             }
 
-            if (jsonResponse.Data is not JArray responseData)
+            if (jsonResponse.Data is not JsonElement { ValueKind: JsonValueKind.Array } responseData)
             {
                 throw new IndexerException(indexerResponse,
                     "Indexer API call response missing result data");
             }
 
-            var queryResults = responseData.ToObject<TorrentQueryResponse[]>();
+            var queryResults = responseData.Deserialize<TorrentQueryResponse[]>(STJson.GetSerializerSettings());
 
             foreach (var result in queryResults)
             {
@@ -86,21 +87,21 @@ namespace NzbDrone.Core.Indexers.HDBits
             return flags;
         }
 
-        private string GetDownloadUrl(string torrentId)
+        private string GetDownloadUrl(long torrentId)
         {
             var url = new HttpUri(_settings.BaseUrl)
                 .CombinePath("/download.php")
-                .AddQueryParam("id", torrentId)
+                .AddQueryParam("id", torrentId.ToString(CultureInfo.InvariantCulture))
                 .AddQueryParam("passkey", _settings.ApiKey);
 
             return url.FullUri;
         }
 
-        private string GetInfoUrl(string torrentId)
+        private string GetInfoUrl(long torrentId)
         {
             var url = new HttpUri(_settings.BaseUrl)
                 .CombinePath("/details.php")
-                .AddQueryParam("id", torrentId);
+                .AddQueryParam("id", torrentId.ToString(CultureInfo.InvariantCulture));
 
             return url.FullUri;
         }
