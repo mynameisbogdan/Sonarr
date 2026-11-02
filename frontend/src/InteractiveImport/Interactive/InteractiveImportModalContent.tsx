@@ -246,7 +246,7 @@ function InteractiveImportModalContentInner(
     isFetching,
     isFetched: isPopulated,
     error,
-    data,
+    data: items,
     originalItems,
   } = useInteractiveImport(
     {
@@ -268,8 +268,6 @@ function InteractiveImportModalContentInner(
     useReprocessInteractiveImportItems();
 
   const wasReprocessing = usePrevious(isReprocessing);
-
-  const items = data;
 
   const { isDeleting, deleteEpisodeFiles, deleteError } =
     useDeleteEpisodeFiles();
