@@ -1,4 +1,5 @@
-import React from 'react';
+import { cloneDeep } from 'lodash';
+import React, { useMemo } from 'react';
 import useSeriesHistory from 'Activity/History/useSeriesHistory';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
@@ -16,7 +17,7 @@ import translate from 'Utilities/String/translate';
 import SeriesHistoryRow from './SeriesHistoryRow';
 import styles from './SeriesHistoryModalContent.module.css';
 
-const columns: Column[] = [
+const COLUMNS: Column[] = [
   {
     name: 'eventType',
     label: '',
@@ -58,6 +59,11 @@ const columns: Column[] = [
     isVisible: true,
   },
   {
+    name: 'indexer',
+    label: () => translate('Indexer'),
+    isVisible: true,
+  },
+  {
     name: 'date',
     label: () => translate('Date'),
     isVisible: true,
@@ -80,13 +86,33 @@ function SeriesHistoryModalContent({
   seasonNumber,
   onModalClose,
 }: SeriesHistoryModalContentProps) {
-  const { isFetching, isFetched, error, data } = useSeriesHistory(
-    seriesId,
-    seasonNumber
-  );
+  const {
+    isFetching,
+    isFetched,
+    error,
+    data: items,
+  } = useSeriesHistory(seriesId, seasonNumber);
 
   const fullSeries = seasonNumber == null;
-  const hasItems = !!data.length;
+  const hasItems = !!items.length;
+
+  const columns: Column[] = useMemo(() => {
+    const result: Column[] = cloneDeep(COLUMNS);
+
+    const showIndexer = items.some(
+      ({ data }) => 'indexer' in data && data.indexer
+    );
+
+    if (!showIndexer) {
+      const indexerColumn = result.find((c) => c.name === 'indexer');
+
+      if (indexerColumn) {
+        indexerColumn.isVisible = false;
+      }
+    }
+
+    return result;
+  }, [items]);
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -112,11 +138,12 @@ function SeriesHistoryModalContent({
         {isFetched && hasItems && !error ? (
           <Table columns={columns}>
             <TableBody>
-              {data.map((item) => {
+              {items.map((item) => {
                 return (
                   <SeriesHistoryRow
                     key={item.id}
                     fullSeries={fullSeries}
+                    columns={columns}
                     {...item}
                   />
                 );
