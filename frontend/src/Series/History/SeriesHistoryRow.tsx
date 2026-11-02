@@ -7,6 +7,7 @@ import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
+import Column from 'Components/Table/Column';
 import TableRow from 'Components/Table/TableRow';
 import Popover from 'Components/Tooltip/Popover';
 import EpisodeFormats from 'Episode/EpisodeFormats';
@@ -40,6 +41,7 @@ interface SeriesHistoryRowProps {
   downloadId?: string;
   fullSeries: boolean;
   customFormatScore: number;
+  columns: Column[];
 }
 
 function SeriesHistoryRow({
@@ -57,6 +59,7 @@ function SeriesHistoryRow({
   downloadId,
   fullSeries,
   customFormatScore,
+  columns,
 }: SeriesHistoryRowProps) {
   const series = useSingleSeries(seriesId);
   const episode = useEpisode(episodeId, 'episodes');
@@ -83,6 +86,11 @@ function SeriesHistoryRow({
         return 'Unknown';
     }
   }, [eventType]);
+
+  const isIndexerColumnVisible = useMemo(
+    () => columns.find((c) => c.name === 'indexer')?.isVisible ?? false,
+    [columns]
+  );
 
   const handleMarkAsFailedPress = useCallback(() => {
     setIsMarkAsFailedModalOpen(true);
@@ -143,6 +151,10 @@ function SeriesHistoryRow({
       <TableRowCell>
         {formatCustomFormatScore(customFormatScore, customFormats.length)}
       </TableRowCell>
+
+      {isIndexerColumnVisible ? (
+        <TableRowCell>{'indexer' in data ? data.indexer : ''}</TableRowCell>
+      ) : null}
 
       <RelativeDateCell date={date} includeSeconds={true} includeTime={true} />
 
