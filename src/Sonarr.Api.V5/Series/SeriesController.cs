@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -117,28 +119,23 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
 
     [HttpGet]
     [Produces("application/json")]
-    public Ok<List<SeriesResource>> AllSeries(int? tvdbId, [FromQuery] SeriesSubresource[]? includeSubresources = null)
+    public async IAsyncEnumerable<SeriesResource> AllSeries(int? tvdbId, [FromQuery] SeriesSubresource[]? includeSubresources = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var seriesStats = _seriesStatisticsService.SeriesStatistics();
-        var seriesResources = new List<SeriesResource>();
+        var seriesStats = _seriesStatisticsService.SeriesStatistics().ToDictionary(x => x.SeriesId);
         var includeSeasonImages = includeSubresources.Contains(SeriesSubresource.SeasonImages);
 
-        if (tvdbId.HasValue)
+        await foreach (var series in FetchSeriesAsync(tvdbId, cancellationToken))
         {
-            seriesResources.AddIfNotNull(_seriesService.FindByTvdbId(tvdbId.Value)?.ToResource(includeSeasonImages));
-        }
-        else
-        {
-            seriesResources.AddRange(_seriesService.GetAllSeries().Select(s => s.ToResource(includeSeasonImages)));
-        }
+            var seriesResource = series.ToResource(includeSeasonImages);
 
-        MapCoversToLocal(seriesResources.ToArray());
-        LinkSeriesStatistics(seriesResources, seriesStats.ToDictionary(x => x.SeriesId));
-        PopulateAlternateTitles(seriesResources);
-        PopulateTranslations(seriesResources);
-        seriesResources.ForEach(LinkRootFolderPath);
+            MapCoversToLocal(seriesResource);
+            LinkSeriesStatistics(seriesResource, seriesStats.GetValueOrDefault(seriesResource.Id));
+            PopulateAlternateTitles(seriesResource);
+            PopulateTranslations(seriesResource);
+            LinkRootFolderPath(seriesResource);
 
-        return TypedResults.Ok(seriesResources);
+            yield return seriesResource;
+        }
     }
 
     [NonAction]
@@ -192,9 +189,9 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
     [RestPostById]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public Results<Created<SeriesResource>, NotFound> AddSeries([FromBody] SeriesResource seriesResource)
+    public async Task<Results<Created<SeriesResource>, NotFound>> AddSeries([FromBody] SeriesResource seriesResource, CancellationToken cancellationToken = default)
     {
-        var series = _addSeriesService.AddSeries(seriesResource.ToModel());
+        var series = await _addSeriesService.AddSeriesAsync(seriesResource.ToModel(), cancellationToken);
 
         return TypedCreated(series.Id);
     }
@@ -202,9 +199,9 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
     [RestPutById]
     [Consumes("application/json")]
     [Produces("application/json")]
-    public Results<Accepted<SeriesResource>, NotFound> UpdateSeries([FromBody] SeriesResource seriesResource, [FromQuery] bool moveFiles = false)
+    public async Task<Results<Accepted<SeriesResource>, NotFound>> UpdateSeries([FromBody] SeriesResource seriesResource, [FromQuery] bool moveFiles = false, CancellationToken cancellationToken = default)
     {
-        var series = _seriesService.GetSeries(seriesResource.Id);
+        var series = await _seriesService.GetSeriesAsync(seriesResource.Id, cancellationToken);
         var sourcePath = series.Path;
         var destinationPath = seriesResource.Path;
 
@@ -241,9 +238,9 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
     }
 
     [RestDeleteById]
-    public NoContent DeleteSeries(int id, bool deleteFiles = false, bool addImportListExclusion = false)
+    public async Task<NoContent> DeleteSeries(int id, bool deleteFiles = false, bool addImportListExclusion = false, CancellationToken cancellationToken = default)
     {
-        _seriesService.DeleteSeries(new List<int> { id }, deleteFiles, addImportListExclusion);
+        await _seriesService.DeleteSeriesAsync([id], deleteFiles, addImportListExclusion, cancellationToken);
 
         return TypedResults.NoContent();
     }
@@ -263,6 +260,24 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
         LinkRootFolderPath(resource);
 
         return resource;
+    }
+
+    private async IAsyncEnumerable<NzbDrone.Core.Tv.Series> FetchSeriesAsync(int? tvdbId, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (tvdbId.HasValue)
+        {
+            if (await _seriesService.FindByTvdbIdAsync(tvdbId.Value, cancellationToken) is { } series)
+            {
+                yield return series;
+            }
+        }
+        else
+        {
+            await foreach (var series in _seriesService.GetAllSeriesAsync(cancellationToken))
+            {
+                yield return series;
+            }
+        }
     }
 
     private void MapCoversToLocal(params SeriesResource[] series)
@@ -289,8 +304,13 @@ public class SeriesController : RestControllerWithSignalR<SeriesResource, NzbDro
         }
     }
 
-    private void LinkSeriesStatistics(SeriesResource resource, SeriesStatistics seriesStatistics)
+    private void LinkSeriesStatistics(SeriesResource resource, SeriesStatistics? seriesStatistics)
     {
+        if (seriesStatistics == null)
+        {
+            return;
+        }
+
         // Only set last aired from statistics if it's missing from the series itself
         resource.LastAired ??= seriesStatistics.LastAired;
 
