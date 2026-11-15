@@ -89,13 +89,16 @@ function AddNewSeriesSearchResult({ series }: AddNewSeriesSearchResultProps) {
   }
 
   const statusChip = getStatusChip(status);
+  const posterUrl = images.find((image) => image.coverType === 'poster')?.url;
 
   return (
     <div
-      className={classNames(
-        styles.searchResult,
-        isExcluded && styles.searchResultExcluded
-      )}
+      className={classNames(styles.searchResult, isExcluded && styles.excluded)}
+      style={
+        isSmallScreen && posterUrl
+          ? { backgroundImage: `url(${posterUrl})` }
+          : undefined
+      }
     >
       <Link
         className={styles.underlay}

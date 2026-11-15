@@ -8,10 +8,13 @@
   border: 1px solid var(--hairline);
   border-radius: 12px;
   background: var(--paperCard);
+  background-position: center 25%;
+  background-size: cover;
   color: inherit;
   transition:
     box-shadow 200ms cubic-bezier(0.25, 1, 0.5, 1),
     border-color 200ms cubic-bezier(0.25, 1, 0.5, 1);
+  background-blend-mode: overlay;
   gap: 20px;
 
   &:hover {
@@ -20,10 +23,10 @@
       0 6px 20px -8px oklch(0% 0 0 / 0.18),
       0 2px 4px -2px oklch(0% 0 0 / 0.08);
   }
-}
 
-.searchResultExcluded {
-  opacity: 0.7;
+  &.excluded {
+    opacity: 0.7;
+  }
 }
 
 .underlay {
