@@ -50,6 +50,7 @@ namespace NzbDrone.Core.MetadataSource.SkyHook
 
             httpRequest.AllowAutoRedirect = true;
             httpRequest.SuppressHttpError = true;
+            httpRequest.RequestTimeout = TimeSpan.FromSeconds(10);
 
             var httpResponse = _httpClient.Get<ShowResource>(httpRequest);
 
