@@ -18,7 +18,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
 
     public class TriblerDownloadClientProxy : ITriblerDownloadClientProxy
     {
-        protected readonly IHttpClient _httpClient;
+        private readonly IHttpClient _httpClient;
         private readonly Logger _logger;
 
         public TriblerDownloadClientProxy(IHttpClient httpClient, Logger logger)
@@ -78,7 +78,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
 
         public List<File> GetDownloadFiles(TriblerDownloadSettings settings, Download downloadItem)
         {
-            var filesRequest = GetRequestBuilder(settings, "api/downloads/" + downloadItem.Infohash + "/files");
+            var filesRequest = GetRequestBuilder(settings, $"api/downloads/{downloadItem.Infohash.ToLower()}/files");
             return ProcessRequest<GetFilesResponse>(filesRequest).Files;
         }
 
@@ -96,7 +96,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
                 RemoveData = deleteData
             };
 
-            var deleteRequestBuilder = GetRequestBuilder(settings, "api/downloads/" + item.DownloadId.ToLower());
+            var deleteRequestBuilder = GetRequestBuilder(settings, $"api/downloads/{item.DownloadId.ToLower()}");
             deleteRequestBuilder.Method = HttpMethod.Delete;
 
             var deleteRequest = deleteRequestBuilder.Build();

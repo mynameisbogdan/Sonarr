@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
 
         public override string Name => "Tribler";
 
-        public override ProviderMessage Message => new ProviderMessage(_localizationService.GetLocalizedString("DownloadClientTriblerProviderMessage", new Dictionary<string, object> { { "clientName", Name }, { "clientVersionRange", "8.0.7" } }), ProviderMessageType.Warning);
+        public override ProviderMessage Message => new(_localizationService.GetLocalizedString("DownloadClientTriblerProviderMessage", new Dictionary<string, object> { { "clientName", Name }, { "clientVersionRange", "8.0.7" } }), ProviderMessageType.Warning);
 
         public override bool PreferTorrentFile => false;
 
@@ -55,14 +55,14 @@ namespace NzbDrone.Core.Download.Clients.Tribler
             foreach (var download in downloads)
             {
                 // If totalsize == 0 the torrent is a magnet downloading metadata
-                if (download.Size == null || download.Size == 0)
+                if (download.Size is null or 0)
                 {
                     continue;
                 }
 
                 var item = new DownloadClientItem
                 {
-                    DownloadId = download.Infohash,
+                    DownloadId = download.Infohash.ToUpper(),
                     Title = download.Name,
 
                     DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, false)
@@ -82,9 +82,13 @@ namespace NzbDrone.Core.Download.Clients.Tribler
                     item.OutputPath += item.Title;
                 }
 
-                item.TotalSize = (long)download.Size;
-                item.RemainingSize = (long)(download.Size * (1 - download.Progress));
+                item.TotalSize = download.Size.Value;
                 item.SeedRatio = download.AllTimeRatio;
+
+                if (download.Progress.HasValue)
+                {
+                    item.RemainingSize = (long)(download.Size.Value * (1 - download.Progress));
+                }
 
                 if (download.Eta.HasValue)
                 {
@@ -141,7 +145,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
                     item.Status = DownloadItemStatus.Paused;
                 }
 
-                if (download.Error != null && download.Error.Length > 0)
+                if (download.Error is { Length: > 0 })
                 {
                     item.Status = DownloadItemStatus.Warning;
                     item.Message = download.Error;
@@ -167,7 +171,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
 
             if (Settings.TvCategory.IsNotNullOrWhiteSpace())
             {
-                destDir = string.Format("{0}/.{1}", destDir, Settings.TvCategory);
+                destDir = $"{destDir}/{Settings.TvCategory}";
             }
 
             return new DownloadClientInfo
@@ -177,7 +181,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
             };
         }
 
-        protected static bool HasReachedSeedLimit(Download torrent, TriblerSettingsResponse config)
+        private static bool HasReachedSeedLimit(Download torrent, TriblerSettingsResponse config)
         {
             if (config == null)
             {
@@ -190,7 +194,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
             }
 
             // if download is still running then it's not finished.
-            if (torrent.Status != DownloadStatus.Stopped)
+            if (torrent.Status is not DownloadStatus.Stopped)
             {
                 return false;
             }
@@ -198,16 +202,19 @@ namespace NzbDrone.Core.Download.Clients.Tribler
             switch (config.Settings.LibTorrent.DownloadDefaults.SeedingMode)
             {
                 case DownloadDefaultsSeedingMode.Ratio:
-
                     return torrent.AllTimeRatio.HasValue
                         && torrent.AllTimeRatio >= config.Settings.LibTorrent.DownloadDefaults.SeedingRatio;
 
                 case DownloadDefaultsSeedingMode.Time:
+                    if (!torrent.TimeAdded.HasValue)
+                    {
+                        return false;
+                    }
+
                     var downloadStarted = DateTimeOffset.FromUnixTimeSeconds(torrent.TimeAdded.Value);
                     var maxSeedingTime = TimeSpan.FromSeconds(config.Settings.LibTorrent.DownloadDefaults.SeedingTime ?? 0);
 
-                    return torrent.TimeAdded.HasValue
-                        && downloadStarted.Add(maxSeedingTime) < DateTimeOffset.Now;
+                    return downloadStarted.Add(maxSeedingTime) < DateTimeOffset.Now;
 
                 case DownloadDefaultsSeedingMode.Never:
                     return true;
@@ -228,7 +235,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
                 AnonymityHops = Settings.AnonymityLevel
             };
 
-            return _proxy.AddFromMagnetLink(Settings, addDownloadRequestObject);
+            return _proxy.AddFromMagnetLink(Settings, addDownloadRequestObject).ToUpper();
         }
 
         protected override string AddFromTorrentFile(RemoteEpisode remoteEpisode, string hash, string filename, byte[] fileContent)
@@ -240,14 +247,9 @@ namespace NzbDrone.Core.Download.Clients.Tribler
         protected override void Test(List<ValidationFailure> failures)
         {
             failures.AddIfNotNull(TestConnection());
-
-            if (failures.HasErrors())
-            {
-                return;
-            }
         }
 
-        protected string GetDownloadDirectory()
+        private string GetDownloadDirectory()
         {
             if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
             {
@@ -265,11 +267,11 @@ namespace NzbDrone.Core.Download.Clients.Tribler
             return $"{destDir.TrimEnd('/')}/{Settings.TvCategory}";
         }
 
-        protected ValidationFailure TestConnection()
+        private ValidationFailure TestConnection()
         {
             try
             {
-                var downloads = GetItems();
+                GetItems();
                 return null;
             }
             catch (DownloadClientAuthenticationException ex)

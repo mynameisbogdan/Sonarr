@@ -25,7 +25,7 @@ namespace NzbDrone.Core.Download.Clients.Tribler
 
     public class TriblerDownloadSettings : IProviderConfig
     {
-        private static readonly TriblerSettingsValidator Validator = new TriblerSettingsValidator();
+        private static readonly TriblerSettingsValidator Validator = new();
 
         public TriblerDownloadSettings()
         {
