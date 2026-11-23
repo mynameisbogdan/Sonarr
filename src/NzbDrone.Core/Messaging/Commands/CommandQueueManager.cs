@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using NLog;
-using NzbDrone.Common;
 using NzbDrone.Common.Composition;
 using NzbDrone.Common.EnsureThat;
 using NzbDrone.Common.Serializer;
@@ -44,7 +43,6 @@ namespace NzbDrone.Core.Messaging.Commands
         private readonly CommandQueue _commandQueue;
 
         public CommandQueueManager(ICommandRepository repo,
-                                   IServiceFactory serviceFactory,
                                    KnownTypes knownTypes,
                                    Logger logger)
         {
@@ -209,7 +207,7 @@ namespace NzbDrone.Core.Messaging.Commands
 
         public void Fail(CommandModel command, string message, Exception e)
         {
-            command.Exception = e.ToString();
+            command.Exception = e?.ToString();
 
             Update(command, CommandStatus.Failed, message);
 

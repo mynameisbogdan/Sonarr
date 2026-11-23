@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             _manageCommandQueue.Push(new RefreshMonitoredDownloadsCommand(), CommandPriority.High);
         }
 
-        private void Refresh()
+        private void Refresh(CommandTrigger commandTrigger)
         {
             _refreshDebounce.Pause();
             try
@@ -79,7 +79,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
                 _trackedDownloadService.UpdateTrackable(trackedDownloads);
                 _eventAggregator.PublishEvent(new TrackedDownloadRefreshedEvent(trackedDownloads));
-                _manageCommandQueue.Push(new ProcessMonitoredDownloadsCommand(), CommandPriority.High);
+                _manageCommandQueue.Push(new ProcessMonitoredDownloadsCommand(), CommandPriority.High, commandTrigger);
             }
             finally
             {
@@ -161,13 +161,13 @@ namespace NzbDrone.Core.Download.TrackedDownloads
 
         public void Execute(RefreshMonitoredDownloadsCommand message)
         {
-            Refresh();
+            Refresh(message.Trigger);
         }
 
         public void Execute(CheckForFinishedDownloadCommand message)
         {
             _logger.Warn("A third party app used the deprecated CheckForFinishedDownload command, it should be updated RefreshMonitoredDownloads instead");
-            Refresh();
+            Refresh(message.Trigger);
         }
 
         public void Handle(EpisodeGrabbedEvent message)
